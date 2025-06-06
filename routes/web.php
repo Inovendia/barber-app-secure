@@ -26,22 +26,23 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-// LINEミニアプリ予約関連
-Route::get('/reserve', [ReservationFormController::class, 'create'])->name('reserve.form');
-Route::post('/reserve', [ReservationFormController::class, 'store'])->name('reserve.store');
+// LINEミニアプリ予約関連（店舗別予約URL対応）
+Route::prefix('reserve/{token}')->name('reserve.')->group(function () {
+    Route::get('/form', [ReservationFormController::class, 'create'])->name('form');
+    Route::get('/calendar', [ReservationFormController::class, 'calender'])->name('calender');
+    Route::post('/confirmation', [ReservationFormController::class, 'showConfirmation'])->name('confirmation');
+    Route::post('/complete', [ReservationFormController::class, 'store'])->name('store');
+});
+
+// 共通処理（予約確認・キャンセルなど）
 Route::get('/reserve/verify', [ReservationFormController::class, 'verify'])->name('reserve.verify');
-Route::post('/reserve/confirmation', [ReservationFormController::class, 'showConfirmation'])->name('reserve.confirmation');
-//Route::get('/reserve/complete', fn() => view('reserve.complete'))->name('reserve.complete');
-Route::get('/reserve/calender', [ReservationFormController::class, 'calender'])->name('reserve.calender');
-Route::get('/test-calender', fn() => view('reserve.calender'));
 Route::post('/reserve/cancel', [ReservationFormController::class, 'cancel'])->name('reserve.cancel');
 
-// routes/web.php
-Route::get('/reserve/verify', [ReservationFormController::class, 'verify'])->name('reserve.verify');
+// テストビュー（任意）
+Route::get('/test-calender', fn() => view('reserve.calender'));
 
-// Webhook
+// LINE Webhook
 Route::post('/webhook', [LineWebhookController::class, 'handle']);
-
 
 // ------------------------
 // 管理者認証不要エリア
