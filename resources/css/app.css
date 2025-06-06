@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 予約追加ボタン */
+.btn-reserve {
+    @apply inline-flex items-center bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded;
+}
+
+.btn-customer {
+    @apply inline-flex items-center bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded;
+}

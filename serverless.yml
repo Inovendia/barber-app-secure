@@ -1,0 +1,38 @@
+service: barber-app
+
+provider:
+  name: aws
+  region: ap-northeast-1
+  runtime: provided.al2
+  environment:
+    APP_STORAGE: /tmp
+    # Laravel 環境変数
+    APP_ENV: production
+    APP_DEBUG: false
+    APP_KEY: ${env:APP_KEY}
+    DB_CONNECTION: mysql
+    DB_HOST: ${env:DB_HOST}
+    DB_PORT: ${env:DB_PORT}
+    DB_DATABASE: ${env:DB_DATABASE}
+    DB_USERNAME: ${env:DB_USERNAME}
+    DB_PASSWORD: ${env:DB_PASSWORD}
+plugins:
+  - ./vendor/bref/bref
+functions:
+  web:
+    handler: public/index.php
+    timeout: 28
+    layers:
+      - ${bref:layer.php-82}     # PHP 8.2 ランタイム
+    events:
+      - httpApi: '*'             # HTTP API（API Gateway v2）で全パスを受ける
+
+package:
+  exclude:
+    - .env
+    - .env.*
+    - .git/**
+    - node_modules/**
+    - vendor/**
+    - tests/**
+
