@@ -21,13 +21,18 @@ class ReservationFormController extends Controller
         $this->lineService = $lineService;
     }
 
-    public function create(Request $request)
+    public function create(Request $request, $token)
     {
+        $shop = Shop::where('public_token', $token)->firstOrFail();
         $lineUserId = $request->query('line_user_id');
-        return view('reserve.form', compact('lineUserId'));
+
+        return view('reserve.form', [
+            'lineUserId' => $lineUserId,
+            'shop' => $shop,
+        ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $token)
     {
         $validated = $request->validate([
             'line_user_id' => 'required|string',
@@ -38,6 +43,8 @@ class ReservationFormController extends Controller
             'reserved_at' => 'required|date',
         ]);
 
+        $shop = Shop::where('public_token', $token)->firstOrFail();
+
         // ユーザー情報を保存 or 更新
         $user = User::updateOrCreate(
             ['line_user_id' => $validated['line_user_id']],
@@ -47,7 +54,7 @@ class ReservationFormController extends Controller
         // 予約を作成（line_tokenを生成）
         $reservation = Reservation::create([
             'user_id' => $user->id,
-            'shop_id' => $request->input('shop_id'),
+            'shop_id' => $shop->id,
             'category' => $validated['category'],
             'menu' => $validated['menu'],
             'reserved_at' => $validated['reserved_at'],
@@ -85,7 +92,7 @@ class ReservationFormController extends Controller
         $user = User::where('line_user_id', $lineUserId)->first();
 
         if (!$user) {
-            return redirect()->route('reserve.form')->with('status', '予約情報が見つかりませんでした。');
+            return redirect()->route('reserve.form', ['token' => $request->query('token')])->with('status', '予約情報が見つかりませんでした。');
         }
 
         $reservations = $user->reservations()->with('shop')->orderByDesc('reserved_at')->get();
@@ -104,7 +111,7 @@ class ReservationFormController extends Controller
     }
 
 
-    public function calender(Request $request)
+    public function calender(Request $request, $token)
     {
         {
             if (!$request->filled(['line_user_id', 'name', 'phone', 'category', 'menu'])) {
@@ -137,8 +144,8 @@ class ReservationFormController extends Controller
         $menu = $request->menu;
         $duration = $menuDurations[$menu] ?? 60;
 
-        $shopId = $request->input('shop_id', 1); // デフォルト1店舗目
-        $shop = Shop::findOrFail($shopId);
+        $shop = Shop::where('public_token', $token)->firstOrFail();
+        $shopId = $shop->id;
         $closedDays = explode(',', $shop->closed_days ?? '');
         $closedDayIndexes = collect(['日','月','火','水','木','金','土'])
             ->filter(fn($d) => in_array($d, $closedDays))
@@ -182,10 +189,12 @@ class ReservationFormController extends Controller
             'confirmedReservations' => $confirmedReservations,
             'menuDurations' => $menuDurations,
             'calenderMarks' => $calenderMarks,
+            'token' => $token,
+            'shop' => $shop,
         ]);
     }
 
-    public function showConfirmation(Request $request)
+    public function showConfirmation(Request $request, $token)
     {
         $validated = $request->validate([
             'line_user_id' => 'required|string',
@@ -196,7 +205,7 @@ class ReservationFormController extends Controller
             'reserved_at' => 'required|date',
         ]);
 
-        return view('reserve.confirmation', $validated);
+        return view('reserve.confirmation', array_merge($validated, ['token' => $token]));
     }
 
     public function showCalender(Request $request)
@@ -256,6 +265,7 @@ class ReservationFormController extends Controller
 
         return view('reserve.confirm', [
             'reservations' => collect([$reservation]), // 単一予約でも繰り返し処理可能に
+            'reservation' => $reservation,
             'lineUserId' => $reservation->user->line_user_id ?? null, // 戻るリンクなどで使うなら
         ]);
     }

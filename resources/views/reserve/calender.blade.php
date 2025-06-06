@@ -29,16 +29,16 @@
     <div class="mb-4 px-2 sm:px-0">
         <div class="flex justify-between items-center flex-wrap gap-2">
             <!-- 前へボタン -->
-            <a href="{{ route('reserve.calender', $prevParams) }}"
+            <a href="{{ route('reserve.calender', ['token' => $token] + $prevParams) }}"
             class="bg-blue-100 text-blue-700 px-3 py-1 rounded font-medium flex items-center hover:bg-blue-200 active:bg-blue-300 whitespace-nowrap">
                 <span class="mr-1 text-lg">◀</span> 前へ
-            </a>
+            </>
             <!-- 日付範囲 -->
             <span class="font-bold text-lg text-center mx-2 flex-1">
                 {{ $dates[0]->format('Y年n月j日') }} 〜 {{ $dates[13]->format('n月j日') }}
             </span>
             <!-- 次へボタン -->
-            <a href="{{ route('reserve.calender', $nextParams) }}"
+            <a href="{{ route('reserve.calender', ['token' => $token] + $nextParams) }}"
             class="bg-blue-100 text-blue-700 px-3 py-1 rounded font-medium flex items-center hover:bg-blue-200 active:bg-blue-300 whitespace-nowrap">
                 次へ <span class="ml-1 text-lg">▶</span>
             </a>
@@ -48,14 +48,14 @@
 
 
     <div class="p-2 sm:p-4 text-gray-800 w-full">
-        <form method="POST" action="{{ route('reserve.confirmation') }}">
+        <form method="POST" action="{{ route('reserve.confirmation', ['token' => $token]) }}">
             @csrf
             <input type="hidden" name="line_user_id" value="{{ request('line_user_id') }}">
             <input type="hidden" name="name" value="{{ request('name') }}">
             <input type="hidden" name="phone" value="{{ request('phone') }}">
             <input type="hidden" name="category" value="{{ request('category') }}">
             <input type="hidden" name="menu" value="{{ request('menu') }}">
-            <input type="hidden" name="shop_id" value="{{ request('shop_id') }}">
+            <input type="hidden" name="shop_id" value="{{ $shop->id }}">
             <input type="hidden" id="reserved_at" name="reserved_at" value="">
 
             <div class="w-full overflow-x-auto border rounded">
@@ -84,12 +84,12 @@
                                     @foreach ($dates as $i => $date)
                                         @php
                                             $now = \Carbon\Carbon::now();
-                                            $plusTwoHours = $now->copy()->addHours(2);
                                             $start = $date->copy()->setTimeFromTimeString($time);
                                             $end = $start->copy()->addMinutes($duration);
 
                                             $isToday = $date->isSameDay($now);
-                                            $isBefore2HoursFromNow = $isToday && $start->lt($plusTwoHours);
+                                            $isPast = $isToday && $start->lt($now);
+                                            $isWithin1Hour = $isToday && $start->between($now, $now->copy()->addHour());
 
                                             $dayOfWeek = $date->dayOfWeek;
                                             $isClosed = in_array($dayOfWeek, $closedDays);
@@ -98,9 +98,8 @@
                                             $lunchEndTime   = $start->copy()->setTimeFromTimeString($lunchEnd)->subMinute();
                                             $isLunchTime    = $start->between($lunchStartTime, $lunchEndTime);
 
-
                                             $beforeOpening = $start->format('H:i') < \Carbon\Carbon::parse($businessStart)->format('H:i');
-                                            $afterClosing = $end->format('H:i') > \Carbon\Carbon::parse($businessEnd)->format('H:i');
+                                            $afterClosing  = $end->format('H:i')   > \Carbon\Carbon::parse($businessEnd)->format('H:i');
 
                                             $slotDateTime = $date->copy()->setTimeFromTimeString($start->format('H:i'))->format('Y-m-d H:i');
                                             $mark = $calenderMarks[$slotDateTime][0]->symbol ?? null;
@@ -110,14 +109,13 @@
 
                                             $normalizedMark = $mark ? trim(mb_convert_kana($mark, 'as')) : null;
 
-                                            if ($isBefore2HoursFromNow) {
+                                            if ($normalizedMark) {
+                                                // 管理者が手動で設定した記号があれば優先
+                                                $displaySymbol = $normalizedMark === '◯' ? '◎' : $normalizedMark;
+                                            } elseif ($isPast || $isClosed || $isOutOfBusiness || $isReserved) {
                                                 $displaySymbol = '×';
-                                            } elseif ($normalizedMark === '◯') {
-                                                $displaySymbol = '◎';
-                                            } elseif ($normalizedMark) {
-                                                $displaySymbol = $normalizedMark;
-                                            } elseif ($isClosed || $isReserved || $isOutOfBusiness) {
-                                                $displaySymbol = '×';
+                                            } elseif ($isWithin1Hour) {
+                                                $displaySymbol = '📞';
                                             } else {
                                                 $displaySymbol = '◎';
                                             }
@@ -125,24 +123,29 @@
                                             $isSelectable = $displaySymbol === '◎';
                                             $cellClasses = 'border px-2 py-1 whitespace-nowrap text-center ' . ($isSelectable ? 'cursor-pointer' : '');
                                         @endphp
+
                                         <td
                                             class="{{ $cellClasses }}"
                                             data-symbol="{{ $displaySymbol }}"
                                             data-slot="{{ $slotDateTime }}"
-                                            {!! $isSelectable ? "onclick=\"selectTime('{$time}', '{$i}')\"" : '' !!}
+                                            @if ($displaySymbol != 'tel' && $isSelectable)
+                                                onclick="selectTime('{{ $time }}', '{{ $i }}')"
+                                            @endif
                                             onmouseenter="if('{{ $displaySymbol }}' === '◎') this.style.backgroundColor = '#ffe4e6'"
                                             onmouseleave="if('{{ $displaySymbol }}' === '◎' && this.dataset.slot !== selectedSlot) this.style.backgroundColor = ''"
                                             style="{{ $displaySymbol === '×' ? 'background-color: #f3f4f6; color: #9ca3af;' : ($displaySymbol === '◎' ? 'color: #e11d48;' : '') }}"
                                         >
-                                            @if ($displaySymbol === 'TEL')
+                                            @if ($displaySymbol === 'tel')
                                                 <div>
-                                                    TEL<br>
-                                                    <a href="tel:{{ $shopPhone ?? '09012345678' }}" class="underline text-blue-600">📞</a>
+                                                    <a href="tel:{{ $shopPhone ?? '09012345678' }}"
+                                                    onclick="event.stopPropagation()"
+                                                    class="underline text-blue-600">📞</a>
                                                 </div>
                                             @else
                                                 {{ $displaySymbol }}
                                             @endif
                                         </td>
+
                                     @endforeach
                                 </tr>
                             @endforeach
