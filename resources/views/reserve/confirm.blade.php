@@ -42,8 +42,9 @@
 
     <div class="mt-8 text-center">
         @if (!empty($lineUserId))
-            <a href="{{ route('reserve.form', ['line_user_id' => $lineUserId]) }}" class="text-blue-600 text-sm hover:underline">
-                ← 予約フォームに戻る
+            <a href="{{ route('reserve.form', ['token' => $reservation->shop->public_token, 'line_user_id' => $lineUserId]) }}"
+                class="text-blue-600 hover:underline text-sm">
+                    ← 予約フォームに戻る
             </a>
         @endif
     </div>

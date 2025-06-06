@@ -12,7 +12,7 @@
             以下の内容で予約を確定します。問題なければ「これで予約」ボタンを押してください。
         </p>
 
-        <form method="POST" action="{{ route('reserve.store') }}">
+        <form method="POST" action="{{ route('reserve.store', ['token' => $token]) }}">
             @csrf
             <input type="hidden" name="line_user_id"  value="{{ $line_user_id }}">
             <input type="hidden" name="name"          value="{{ $name }}">

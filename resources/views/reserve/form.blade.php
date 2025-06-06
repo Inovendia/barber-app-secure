@@ -9,7 +9,7 @@
 
         @if (!empty($lineUserId))
             <div class="mb-4 text-right">
-                <a href="{{ route('reserve.confirm', ['line_user_id' => $lineUserId]) }}"
+                <a href="{{ route('reserve.verify', ['token' => $shop->public_token, 'line_user_id' => $lineUserId]) }}"
                     class="text-blue-600 hover:underline text-sm">
                     👉 現在の予約を確認する
                 </a>
@@ -22,14 +22,15 @@
             </div>
         @endif
 
-        <form method="GET" action="{{ route('reserve.calender') }}" onsubmit="return checkBeforeSubmit();"class="space-y-4">
+        <form method="GET" action="{{ route('reserve.calender', ['token' => $shop->public_token]) }}" onsubmit="return checkBeforeSubmit();">
+
             @csrf
             <input type="hidden" name="line_user_id" value="" id="hidden_line_user_id">
             <input type="hidden" name="name" id="hidden_name">
             <input type="hidden" name="phone" id="hidden_phone">
             <input type="hidden" name="category" id="hidden_category">
             <input type="hidden" name="menu" id="hidden_menu">
-            <input type="hidden" name="shop_id" value="{{ request('shop_id', 1) }}">
+            <input type="hidden" name="shop_id" value="{{ $shop->id }}">
 
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700">お名前</label>

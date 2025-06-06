@@ -29,16 +29,16 @@
     <div class="mb-4 px-2 sm:px-0">
         <div class="flex justify-between items-center flex-wrap gap-2">
             <!-- 前へボタン -->
-            <a href="{{ route('reserve.calender', $prevParams) }}"
+            <a href="{{ route('reserve.calender', ['token' => $token] + $prevParams) }}"
             class="bg-blue-100 text-blue-700 px-3 py-1 rounded font-medium flex items-center hover:bg-blue-200 active:bg-blue-300 whitespace-nowrap">
                 <span class="mr-1 text-lg">◀</span> 前へ
-            </a>
+            </>
             <!-- 日付範囲 -->
             <span class="font-bold text-lg text-center mx-2 flex-1">
                 {{ $dates[0]->format('Y年n月j日') }} 〜 {{ $dates[13]->format('n月j日') }}
             </span>
             <!-- 次へボタン -->
-            <a href="{{ route('reserve.calender', $nextParams) }}"
+            <a href="{{ route('reserve.calender', ['token' => $token] + $nextParams) }}"
             class="bg-blue-100 text-blue-700 px-3 py-1 rounded font-medium flex items-center hover:bg-blue-200 active:bg-blue-300 whitespace-nowrap">
                 次へ <span class="ml-1 text-lg">▶</span>
             </a>
@@ -48,14 +48,14 @@
 
 
     <div class="p-2 sm:p-4 text-gray-800 w-full">
-        <form method="POST" action="{{ route('reserve.confirmation') }}">
+        <form method="POST" action="{{ route('reserve.confirmation', ['token' => $token]) }}">
             @csrf
             <input type="hidden" name="line_user_id" value="{{ request('line_user_id') }}">
             <input type="hidden" name="name" value="{{ request('name') }}">
             <input type="hidden" name="phone" value="{{ request('phone') }}">
             <input type="hidden" name="category" value="{{ request('category') }}">
             <input type="hidden" name="menu" value="{{ request('menu') }}">
-            <input type="hidden" name="shop_id" value="{{ request('shop_id') }}">
+            <input type="hidden" name="shop_id" value="{{ $shop->id }}">
             <input type="hidden" id="reserved_at" name="reserved_at" value="">
 
             <div class="w-full overflow-x-auto border rounded">
