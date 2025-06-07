@@ -11,14 +11,11 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="{{ secure_asset('build/assets/app-C8H6n9kb.css') }}">
+    <!-- ✅ Styles & Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- ✅ Alpine.js を先に読み込む -->
+    <!-- ✅ 必要ならAlpine.js（任意） -->
     <script src="https://unpkg.com/alpinejs@3.13.5/dist/cdn.min.js" defer></script>
-
-    <!-- ✅ LaravelのビルドJSは defer をつけて最後に -->
-    <script src="{{ secure_asset('build/assets/app-Bo-u61x1.js') }}" defer></script>
 </head>
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-gray-100">
