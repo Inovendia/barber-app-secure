@@ -14,7 +14,7 @@ class AdminAuthController extends Controller
     }
 
     public function login(Request $request)
-    {
+    {   echo("test")
         $credentials = $request->only('email', 'password');
 
         $ok = Auth::guard('admin')->attempt($credentials);
