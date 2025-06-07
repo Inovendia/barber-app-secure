@@ -61,11 +61,10 @@
                 </select>
             </div>
 
-            <div>
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">
-                    日時選択へ進む
-                </button>
-            </div>
+            <button type="submit"
+                class="mt-6 w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md text-center hover:bg-blue-700 transition">
+                日時選択へ進む
+            </button>
         </form>
 
     </div>
