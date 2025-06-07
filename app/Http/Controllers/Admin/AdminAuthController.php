@@ -10,13 +10,13 @@ class AdminAuthController extends Controller
 {
     public function showLoginForm()
     {
-        print("gogo");
+        Log::debug('ログイン処理開始');
         return view('admin.login');
     }
 
     public function login(Request $request)
     {
-        print("test");
+        Log::debug('ログイン');
         $credentials = $request->only('email', 'password');
 
         $ok = Auth::guard('admin')->attempt($credentials);
