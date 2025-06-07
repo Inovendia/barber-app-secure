@@ -10,13 +10,13 @@ class AdminAuthController extends Controller
 {
     public function showLoginForm()
     {
-        echo("gogo");
+        print("gogo");
         return view('admin.login');
     }
 
     public function login(Request $request)
     {
-        echo("test");
+        print("test");
         $credentials = $request->only('email', 'password');
 
         $ok = Auth::guard('admin')->attempt($credentials);
