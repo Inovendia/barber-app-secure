@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 class AdminAuthController extends Controller
 {
     public function showLoginForm()
-    {
+    {   echo("gogo")
         return view('admin.login');
     }
 
