@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\Auth;
 class AdminAuthController extends Controller
 {
     public function showLoginForm()
-    {
+    {   echo("gogo")
         return view('admin.login');
     }
 
     public function login(Request $request)
-    {
+    {   echo("test")
         $credentials = $request->only('email', 'password');
 
         $ok = Auth::guard('admin')->attempt($credentials);
