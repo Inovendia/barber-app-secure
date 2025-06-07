@@ -27,25 +27,25 @@
     @endphp
 
     <div class="mb-4 px-2 sm:px-0">
-        <div class="flex justify-between items-center flex-wrap gap-2">
-            <!-- 前へボタン -->
+        <div class="flex items-center justify-between">
+            <!-- 左：前へ -->
             <a href="{{ route('reserve.calender', ['token' => $token] + $prevParams) }}"
-            class="bg-blue-100 text-blue-700 px-3 py-1 rounded font-medium flex items-center hover:bg-blue-200 active:bg-blue-300 whitespace-nowrap">
+            class="bg-blue-100 text-blue-700 px-3 py-1 rounded font-medium inline-flex items-center hover:bg-blue-200 active:bg-blue-300 whitespace-nowrap">
                 <span class="mr-1 text-lg">◀</span> 前へ
-            </>
-            <!-- 日付範囲 -->
-            <span class="font-bold text-lg text-center mx-2 flex-1">
+            </a>
+
+            <!-- 中央：日付（折り返さないよう最大幅指定） -->
+            <div class="mx-2 text-lg font-bold text-center whitespace-nowrap">
                 {{ $dates[0]->format('Y年n月j日') }} 〜 {{ $dates[13]->format('n月j日') }}
-            </span>
-            <!-- 次へボタン -->
+            </div>
+
+            <!-- 右：次へ -->
             <a href="{{ route('reserve.calender', ['token' => $token] + $nextParams) }}"
-            class="bg-blue-100 text-blue-700 px-3 py-1 rounded font-medium flex items-center hover:bg-blue-200 active:bg-blue-300 whitespace-nowrap">
+            class="bg-blue-100 text-blue-700 px-3 py-1 rounded font-medium inline-flex items-center hover:bg-blue-200 active:bg-blue-300 whitespace-nowrap">
                 次へ <span class="ml-1 text-lg">▶</span>
             </a>
         </div>
     </div>
-
-
 
     <div class="p-2 sm:p-4 text-gray-800 w-full">
         <form method="POST" action="{{ route('reserve.confirmation', ['token' => $token]) }}">
@@ -122,30 +122,30 @@
 
                                             $isSelectable = $displaySymbol === '◎';
                                             $cellClasses = 'border px-2 py-1 whitespace-nowrap text-center ' . ($isSelectable ? 'cursor-pointer' : '');
+                                            $isPhoneSymbol = $normalizedMark === 'tel' || $displaySymbol === '📞';
                                         @endphp
 
                                         <td
                                             class="{{ $cellClasses }}"
                                             data-symbol="{{ $displaySymbol }}"
                                             data-slot="{{ $slotDateTime }}"
-                                            @if ($displaySymbol != 'tel' && $isSelectable)
+                                            @if (! $isPhoneSymbol && $isSelectable)
                                                 onclick="selectTime('{{ $time }}', '{{ $i }}')"
                                             @endif
                                             onmouseenter="if('{{ $displaySymbol }}' === '◎') this.style.backgroundColor = '#ffe4e6'"
                                             onmouseleave="if('{{ $displaySymbol }}' === '◎' && this.dataset.slot !== selectedSlot) this.style.backgroundColor = ''"
                                             style="{{ $displaySymbol === '×' ? 'background-color: #f3f4f6; color: #9ca3af;' : ($displaySymbol === '◎' ? 'color: #e11d48;' : '') }}"
                                         >
-                                            @if ($displaySymbol === 'tel')
-                                                <div>
-                                                    <a href="tel:{{ $shopPhone ?? '09012345678' }}"
-                                                    onclick="event.stopPropagation()"
-                                                    class="underline text-blue-600">📞</a>
-                                                </div>
+                                            @if ($displaySymbol === 'tel' || $displaySymbol === '📞')
+                                                <a href="tel:{{ $shopPhone ?? '09012345678' }}"
+                                                onclick="event.stopPropagation()"
+                                                class="inline-block text-blue-600 underline hover:text-blue-800 cursor-pointer">
+                                                    📞
+                                                </a>
                                             @else
                                                 {{ $displaySymbol }}
                                             @endif
                                         </td>
-
                                     @endforeach
                                 </tr>
                             @endforeach
