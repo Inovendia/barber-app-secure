@@ -7,7 +7,7 @@
         <!-- セッションステータス -->
         <x-auth-session-status class="mb-4" :status="session('status')" />
 
-        <form method="POST" action="{{ root('admin.login') }}" class="space-y-4">
+        <form method="POST" action="{{ route('admin.login') }}" class="space-y-4">
             @csrf
 
             <!-- Email -->
