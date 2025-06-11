@@ -16,12 +16,15 @@ class AdminAuthController extends Controller
 
     public function login(Request $request)
     {
-        Log::debug('ログイン');
+        Log::debug('ログイン開始');
         $credentials = $request->only('email', 'password');
+        Log::debug('入力情報');
 
         $ok = Auth::guard('admin')->attempt($credentials);
+        Log::debug('認証結果');
 
         if ($ok) {
+            Log::debug('認証成功');
             $request->session()->regenerate();
 
             // 🔽 ここでログイン中の管理者を取得
@@ -35,6 +38,7 @@ class AdminAuthController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
+        Log::debug('認証失敗');
         return back()->withErrors([
             'email' => 'ログイン情報が正しくありません',
         ])->onlyInput('email');
