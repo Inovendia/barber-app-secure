@@ -29,7 +29,7 @@
                                     {{-- Note に画像があればそれだけ表示 --}}
                                     @if (!empty($note->signed_url))
                                         <div class="w-20 h-20 rounded border bg-gray-100 overflow-hidden flex items-center justify-center">
-                                            <img src="{{ $note->signed_url }}"
+                                            <img src="{!! $note->signed_url !!}"
                                                 alt="画像"
                                                 class="object-cover w-full h-full">
                                         </div>
