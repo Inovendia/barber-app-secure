@@ -33,13 +33,6 @@
                                                 alt="画像"
                                                 class="object-cover w-full h-full">
                                         </div>
-
-                                        {{-- 🔽 これデバッグだから後で消す --}}
-                                        <p class="text-xs text-red-500">
-                                            image_path: {{ $note->image_path }}<br>
-                                            signed_url: {{ $note->signed_url ?? 'なし' }}
-                                        </p>
-
                                     {{-- Note に画像がなければ、Customer に紐づく画像をすべて表示 --}}
                                     @elseif (!empty($note->customer->images))
                                         @foreach ($note->customer->images as $image)
