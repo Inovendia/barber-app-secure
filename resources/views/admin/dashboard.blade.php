@@ -244,6 +244,15 @@
                                                                 alt="画像"
                                                                 class="w-16 h-16 object-cover rounded shadow cursor-pointer"
                                                                 @click="modalImage = '{{ $note->signed_url }}'; showModal = true">
+                                    
+                                    
+                                                                {{-- 🔽 これデバッグだから後で消す --}}
+                                                                <p class="text-xs text-red-500">
+                                                                    image_path: {{ $note->image_path }}<br>
+                                                                    signed_url: {{ $note->signed_url ?? 'なし' }}
+                                                                </p>
+
+                                                                
                                                         @elseif (!empty($note->customer) && $note->customer->images && $note->customer->images->count())
                                                             {{-- Customerの画像がある場合 --}}
                                                             @foreach ($note->customer->images as $image)
