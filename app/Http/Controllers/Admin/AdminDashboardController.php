@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Note;
 use App\Models\Customer;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class AdminDashboardController extends Controller
 {
@@ -47,6 +48,14 @@ class AdminDashboardController extends Controller
             ->orderByDesc('created_at')
             ->where('created_at', '>=', now()->subDays(3))
             ->get();
+            foreach ($notes as $note) {
+                if ($note->image_path) {
+                    $note->signed_url = Storage::disk('s3')->temporaryUrl(
+                        $note->image_path,
+                        now()->addMinutes(10)
+                    );
+                }
+            }
 
         $searchResult = null;
 
