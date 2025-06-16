@@ -48,54 +48,84 @@ class AdminDashboardController extends Controller
             ->orderByDesc('created_at')
             ->where('created_at', '>=', now()->subDays(3))
             ->get();
-            foreach ($notes as $note) {
-                if ($note->image_path) {
-                    $note->signed_url = Storage::disk('s3')->temporaryUrl(
-                        $note->image_path,
-                        now()->addMinutes(10)
-                    );
-                }
+
+        foreach ($notes as $note) {
+            if ($note->image_path) {
+                $note->signed_url = Storage::disk('s3')->temporaryUrl(
+                    $note->image_path,
+                    now()->addMinutes(10)
+                );
             }
+        }
 
         $searchResult = null;
 
         if ($request->filled('selected_customer')) {
             $value = $request->query('selected_customer');
 
+            // LINEユーザーの場合
             if (Str::startsWith($value, 'user_')) {
                 $id = Str::after($value, 'user_');
                 $user = User::find($id);
 
-                if ($user && $user->shop_id === $shopId) { // ✅ 店舗IDが一致するか確認
+                if ($user && $user->shop_id === $shopId) {
                     $request->merge(['selected_customer_id' => $id]);
+
+                    $notes = Note::where('user_id', $user->id)
+                        ->where('shop_id', $shopId)
+                        ->orderByDesc('created_at')
+                        ->get();
+
+                    foreach ($notes as $note) {
+                        if ($note->image_path) {
+                            $note->signed_url = Storage::disk('s3')->temporaryUrl(
+                                $note->image_path,
+                                now()->addMinutes(10)
+                            );
+                        }
+                    }
 
                     $searchResult = [
                         'type' => 'user',
                         'name' => $user->name,
                         'phone' => $user->phone,
-                        'notes' => Note::where('user_id', $user->id)
-                            ->where('shop_id', $shopId) // ✅ 他店舗のノート防止
-                            ->orderByDesc('created_at')->get(),
+                        'notes' => $notes,
                     ];
                 }
-            } elseif (Str::startsWith($value, 'customer_')) {
+            }
+
+            // 手動登録の顧客の場合
+            elseif (Str::startsWith($value, 'customer_')) {
                 $id = Str::after($value, 'customer_');
                 $customer = Customer::find($id);
 
-                if ($customer && $customer->shop_id === $shopId) { // ✅ 店舗IDが一致するか確認
+                if ($customer && $customer->shop_id === $shopId) {
                     $request->merge(['selected_customer_id' => $id]);
+
+                    $notes = Note::where('customer_id', $customer->id)
+                        ->where('shop_id', $shopId)
+                        ->orderByDesc('created_at')
+                        ->get();
+
+                    foreach ($notes as $note) {
+                        if ($note->image_path) {
+                            $note->signed_url = Storage::disk('s3')->temporaryUrl(
+                                $note->image_path,
+                                now()->addMinutes(10)
+                            );
+                        }
+                    }
 
                     $searchResult = [
                         'type' => 'customer',
                         'name' => $customer->name,
                         'phone' => $customer->phone,
-                        'notes' => Note::where('customer_id', $customer->id)
-                            ->where('shop_id', $shopId) // ✅ 他店舗のノート防止
-                            ->orderByDesc('created_at')->get(),
+                        'notes' => $notes,
                     ];
                 }
             }
         }
+
 
         return view('admin.dashboard', compact(
             'reservations',
