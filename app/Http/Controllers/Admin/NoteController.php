@@ -27,9 +27,17 @@ class NoteController extends Controller
         $note->created_by = Auth::guard('admin')->user()->name ?? '管理者';
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('note_images', 's3');
+            $file = $request->file('image');
+            $path = 'note_images/' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+            Storage::disk('s3')->put($path, file_get_contents($file), [
+                'ACL' => 'bucket-owner-full-control',
+                'ContentType' => $file->getMimeType(), // 明示すると便利
+            ]);
+
             $note->image_path = $path;
         }
+
 
         if (Str::startsWith($value, 'user_')) {
             $note->user_id = Str::after($value, 'user_');
