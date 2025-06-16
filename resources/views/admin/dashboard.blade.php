@@ -239,18 +239,18 @@
                                                 <td class="px-4 py-2 whitespace-nowrap">
                                                     <div class="flex flex-wrap gap-1">
                                                         {{-- Noteの画像がある場合 --}}
-                                                        @if ($note->image_path)
-                                                            <img src="{{ asset('storage/' . $note->image_path) }}"
+                                                        @if ($note->signed_url)
+                                                            <img src="{{ $note->signed_url }}"
                                                                 alt="画像"
                                                                 class="w-16 h-16 object-cover rounded shadow cursor-pointer"
-                                                                @click="modalImage = '{{ asset('storage/' . $note->image_path) }}'; showModal = true">
+                                                                @click="modalImage = '{{ $note->signed_url }}'; showModal = true">
                                                         @elseif (!empty($note->customer) && $note->customer->images && $note->customer->images->count())
                                                             {{-- Customerの画像がある場合 --}}
                                                             @foreach ($note->customer->images as $image)
-                                                                <img src="{{ asset('storage/' . $image->image_path) }}"
+                                                                <img src="{{ $note->signed_url }}"
                                                                     alt="画像"
                                                                     class="w-16 h-16 object-cover rounded shadow cursor-pointer"
-                                                                    @click="modalImage = '{{ asset('storage/' . $image->image_path) }}'; showModal = true">
+                                                                    @click="modalImage = '{{ $note->signed_url }}'; showModal = true">
                                                             @endforeach
                                                         @else
                                                             <span class="text-gray-400 text-sm">画像なし</span>
