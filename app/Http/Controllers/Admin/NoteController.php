@@ -26,7 +26,7 @@ class NoteController extends Controller
         $note->created_by = Auth::guard('admin')->user()->name ?? '管理者';
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('note_images', 'public');
+            $path = $request->file('image')->store('note_images', 's3');
             $note->image_path = $path;
         }
 
