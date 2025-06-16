@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Note;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class NoteController extends Controller
 {
@@ -51,6 +52,15 @@ class NoteController extends Controller
             $name = optional($notes->first()->customer)->name ?? '未登録顧客';
         } else {
             abort(404);
+        }
+
+        foreach ($notes as $note) {
+            if ($note->image_path) {
+                $note->signed_url = Storage::disk('s3')->temporaryUrl(
+                    $note->image_path,
+                    now()->addMinutes(10)
+                );
+            }
         }
 
         return view('admin.notes.show', compact('notes', 'name', 'type', 'id'));
