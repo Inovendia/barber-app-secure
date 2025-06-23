@@ -16,7 +16,7 @@ class NoteController extends Controller
         $request->validate([
             'customer_type_and_id' => 'required|string',
             'content' => 'required|string|max:1000',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,JPEG,PNG,JPG|max:4096',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,JPEG,PNG,JPG|max:10240',
         ]);
 
         $value = $request->input('customer_type_and_id');
