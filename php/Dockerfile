@@ -5,3 +5,4 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY php.ini /usr/local/etc/php/conf.d/custom.ini
