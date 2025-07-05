@@ -2,7 +2,11 @@
 
 <x-guest-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold text-gray-800">予約フォーム</h2>
+        <div class="flex justify-center mb-4">
+            <img src="{{ asset('images/logo.png') }}" alt="Rezamie Logo" class="w-24 h-auto">
+        </div>
+
+        <h2 class="text-xl font-semibold text-gray-800">新規予約</h2>
     </x-slot>
 
     <div class="p-6 text-gray-800">
