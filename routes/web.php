@@ -24,6 +24,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/', function () {
+    return view('top');
+});
+
 require __DIR__.'/auth.php';
 
 // LINEミニアプリ予約関連（店舗別予約URL対応）
