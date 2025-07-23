@@ -10,6 +10,12 @@
 </head>
 <body class="bg-gray-50 text-gray-800 leading-relaxed font-sans">
 
+    <div class="w-full bg-white shadow-sm py-4 px-6 flex justify-end">
+        <a href="{{ url('/admin/login') }}" class="text-blue-600 font-semibold hover:underline">
+            ログインはこちら
+        </a>
+    </div>
+
     <div class="max-w-3xl mx-auto px-6 py-12">
         <h1 class="text-4xl font-bold mb-6 text-pink-600">Rezamie（リザミー）</h1>
         <p class="mb-6">Rezamieは、LINEから簡単に予約できる美容室・理容室向けミニアプリです。</p>
@@ -27,9 +33,8 @@
             ご質問や不具合がございましたら、<a href="mailto:support@rezamie.com" class="text-blue-600 underline">rezamie.info@gmail.com</a> までご連絡ください。<br>
         </p>
 
-        <h2 class="text-2xl font-semibold mb-2">利用規約・プライバシーポリシー</h2>
-        <p class="mb-1"><a href="/terms" class="text-blue-600 underline">▶ 利用規約はこちら</a></p>
-        <p><a href="/privacy" class="text-blue-600 underline">▶ プライバシーポリシーはこちら</a></p>
+        <h2 class="text-2xl font-semibold mb-2">プライバシーポリシー</h2>
+        <p><a href="{{ route('privacy') }}" class="text-blue-600 underline">▶ プライバシーポリシーはこちら</a></p>
     </div>
 
 </body>

@@ -24,9 +24,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+
+//top用
 Route::get('/', function () {
     return view('top');
 });
+
+Route::view('/privacy', 'privacy')->name('privacy');
+
+//
 
 require __DIR__.'/auth.php';
 
