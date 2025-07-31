@@ -76,23 +76,32 @@
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    liff.init({ liffId: '{{ config('services.liff.id') }}' })
-        .then(() => {
-            if (!liff.isLoggedIn()) {
-                liff.login();
-            } else {
-                liff.getProfile().then(profile => {
-                    const lineUserId = profile.userId;
-                    document.getElementById('hidden_line_user_id').value = lineUserId;
-                });
-            }
-        })
-        .catch(err => {
-            alert('LINE連携に失敗しました');
-            console.error(err);
-        });
+document.addEventListener('DOMContentLoaded', async function () {
+    try {
+        await liff.init({ liffId: '{{ config('services.liff.id') }}' });
+
+        if (!liff.isInClient()) {
+            alert("LINEアプリ内で開いてください。");
+            return;
+        }
+
+        const context = liff.getContext();
+        const lineUserId = context.userId;
+
+        if (!lineUserId) {
+            alert('LINE認証に失敗しました。友だち追加やLIFF設定をご確認ください。');
+            return;
+        }
+
+        document.getElementById('hidden_line_user_id').value = lineUserId;
+        console.log("✅ LINE認証成功: " + lineUserId);
+
+    } catch (err) {
+        alert('LIFFの初期化に失敗しました');
+        console.error(err);
+    }
 });
+</script>
 
 // 入力チェックとhiddenへのコピー
 function checkBeforeSubmit() {
