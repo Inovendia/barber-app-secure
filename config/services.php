@@ -41,7 +41,10 @@ return [
     ],
 
     'liff' => [
-        'id' => env('LIFF_ID'),
-    ],
-
+        'id' => match (env('APP_ENV')) {
+            'production' => env('LIFF_ID_PROD'),
+            'examination'      => env('LIFF_ID_EXAM'), // ← 審査用
+            default      => env('LIFF_ID_DEV'),   // ← local or staging
+        },
+    ]
 ];
