@@ -103,6 +103,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 });
 </script>
 
+<script>
 // 入力チェックとhiddenへのコピー
 function checkBeforeSubmit() {
     const name = document.getElementById('name').value;
