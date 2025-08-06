@@ -48,6 +48,9 @@
             ご不明な点がございましたら <a href="mailto:rezamie.info@gmail.com" class="text-blue-600 underline">rezamie.info@gmail.com</a>までお問い合わせください
         </p>
         <p>
+            <a href="{{ route('support') }}" class="text-blue-600 underline">▶ カスタマーサポート</a>
+        </p>
+        <p>
             <a href="{{ route('privacy') }}" class="text-blue-600 underline">▶ プライバシーポリシー</a>
         </p>
     </footer>
