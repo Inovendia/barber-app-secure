@@ -1,6 +1,6 @@
 <?php
 
-// app/Models/CalendarMark.php
+// app/Models/CalenderMark.php
 
 namespace App\Models;
 
