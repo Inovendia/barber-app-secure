@@ -31,6 +31,7 @@ Route::get('/', function () {
 });
 
 Route::view('/privacy', 'privacy')->name('privacy');
+Route::view('/support', 'support')->name('support');
 
 //
 
