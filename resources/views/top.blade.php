@@ -54,7 +54,7 @@
     <p class="text-center text-sm">
     <a href="mailto:rezamie.info@gmail.com" class="text-blue-600 underline">rezamie.info@gmail.com</a> ／
     <a href="{{ route('support') }}" class="text-blue-600 underline">カスタマーサポート</a> ／
-    <a href="{{ route('policy.privacy') }}" class="text-blue-600 underline">プライバシーポリシー</a>
+    <a href="{{ route('privacy') }}" class="text-blue-600 underline">プライバシーポリシー</a>
     </p>
 
 </body>
