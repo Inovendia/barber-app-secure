@@ -3,9 +3,13 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use LINE\Clients\MessagingApi\Api\MessagingApiApi;
+use GuzzleHttp\Client;
+
 use LINE\Clients\MessagingApi\Configuration;
+use LINE\Clients\MessagingApi\Api\MessagingApiApi;
+use LINE\Clients\MessagingApi\Api\MessagingApiBlobApi;
 use LINE\Clients\MessagingApi\Model\CreateRichMenuAliasRequest;
+use LINE\Clients\MessagingApi\Model\RichMenuRequest;
 
 class LineRichMenuSetup extends Command
 {
@@ -19,32 +23,63 @@ class LineRichMenuSetup extends Command
 
     public function handle()
     {
-        $config = Configuration::getDefaultConfiguration()
-            ->setAccessToken(config('services.line.channel_access_token'));
-        $api = new MessagingApiApi(null, $config);
+        $accessToken = config('services.line.channel_access_token');
+        if (!$accessToken) {
+            $this->error('services.line.channel_access_token が未設定です。');
+            return Command::FAILURE;
+        }
 
-        // NORMAL
-        $normal = json_decode(file_get_contents($this->option('normalJson')), true);
+        $config = Configuration::getDefaultConfiguration()->setAccessToken($accessToken);
+        $client = new Client();
+
+        // API クライアント
+        $api  = new MessagingApiApi($client, $config);       // JSON系
+        $blob = new MessagingApiBlobApi($client, $config);   // 画像などバイナリ系
+
+        // -------- NORMAL --------
+        $normal = new RichMenuRequest(json_decode(file_get_contents(base_path($this->option('normalJson'))), true));
         $normalId = $api->createRichMenu($normal)->getRichMenuId();
-        $api->setRichMenuImage($normalId, fopen($this->option('normalImg'), 'r'), 'image/png');
+
+        $normalImgPath = base_path($this->option('normalImg'));
+        $normalMime = @mime_content_type($normalImgPath) ?: 'image/png';
+        $blob->setRichMenuImage(
+            $normalId,
+            new \SplFileObject($normalImgPath),
+            null,        // hostIndex
+            [],          // variables
+            $normalMime  // Content-Type (image/png or image/jpeg)
+        );
+
         $api->createRichMenuAlias(new CreateRichMenuAliasRequest([
             'richMenuAliasId' => 'normal',
-            'richMenuId' => $normalId
+            'richMenuId'      => $normalId,
         ]));
 
-        // VIP
-        $vip = json_decode(file_get_contents($this->option('vipJson')), true);
+        // -------- VIP --------
+        $vip = new RichMenuRequest(json_decode(file_get_contents(base_path($this->option('vipJson'))), true));
         $vipId = $api->createRichMenu($vip)->getRichMenuId();
-        $api->setRichMenuImage($vipId, fopen($this->option('vipImg'), 'r'), 'image/png');
+
+        $vipImgPath = base_path($this->option('vipImg'));
+        $vipMime = @mime_content_type($vipImgPath) ?: 'image/png';
+        $blob->setRichMenuImage(
+            $vipId,                      // ← バグ防止：vipId を使う
+            new \SplFileObject($vipImgPath),
+            null,
+            [],
+            $vipMime
+        );
+
         $api->createRichMenuAlias(new CreateRichMenuAliasRequest([
             'richMenuAliasId' => 'vip',
-            'richMenuId' => $vipId
+            'richMenuId'      => $vipId,
         ]));
 
-        // デフォルトをNORMALに
+        // デフォルトは NORMAL
         $api->setDefaultRichMenu($normalId);
 
-        $this->info("NORMAL: $normalId (alias: normal)");
-        $this->info("VIP   : $vipId (alias: vip)");
+        $this->info("NORMAL created: $normalId (alias: normal)");
+        $this->info("VIP created   : $vipId (alias: vip)");
+
+        return Command::SUCCESS;
     }
 }
