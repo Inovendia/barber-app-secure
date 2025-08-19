@@ -116,7 +116,7 @@ Route::prefix('admin')->middleware('auth:admin')->name('admin.')->group(function
 
     Route::delete('/calender-marks', [App\Http\Controllers\Admin\CalenderMarkController::class, 'destroy'])->name('calender_marks.destroy');
 
-    Route::post('/calender_marks/bulk', [CalenderMarkController::class, 'bulk'])->name('calender_marks.bulk');
+    Route::post('/calender_marks', [App\Http\Controllers\Admin\CalenderMarkController::class, 'bulk'])->name('calender_marks.bulk');
 
 });
 
