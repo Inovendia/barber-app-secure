@@ -50,10 +50,11 @@ class LineRichMenuSetup extends Command
             $normalMime  // Content-Type (image/png or image/jpeg)
         );
 
-        $api->createRichMenuAlias(new CreateRichMenuAliasRequest([
+        $api->updateRichMenuAlias('normal', new CreateRichMenuAliasRequest([
             'richMenuAliasId' => 'normal',
             'richMenuId'      => $normalId,
         ]));
+
 
         // -------- VIP --------
         $vip = new RichMenuRequest(json_decode(file_get_contents(base_path($this->option('vipJson'))), true));
@@ -69,10 +70,11 @@ class LineRichMenuSetup extends Command
             $vipMime
         );
 
-        $api->createRichMenuAlias(new CreateRichMenuAliasRequest([
+        $api->updateRichMenuAlias('vip', new CreateRichMenuAliasRequest([
             'richMenuAliasId' => 'vip',
             'richMenuId'      => $vipId,
         ]));
+
 
         // デフォルトは NORMAL
         $api->setDefaultRichMenu($normalId);
