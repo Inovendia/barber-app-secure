@@ -66,10 +66,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 //line userID取得
-Route::post('/line/webhook', function (Request $request) {
-    Log::debug('LINE Webhook event: ' . json_encode($request->all(), JSON_UNESCAPED_UNICODE));
-    return response()->json(['status' => 'ok']);
-});
+//Route::post('/line/webhook', function (Request $request) {
+//    Log::debug('LINE Webhook event: ' . json_encode($request->all(), JSON_UNESCAPED_UNICODE));
+//    return response()->json(['status' => 'ok']);
+//});
 
 
 
