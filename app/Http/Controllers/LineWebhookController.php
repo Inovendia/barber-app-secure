@@ -62,21 +62,50 @@ class LineWebhookController extends Controller
                 continue;
             }
 
-            // 3) VIPメニューの「履歴から予約」 → 簡易リンクを通知
+            // 3) postback アクション
             if ($type === 'postback') {
                 parse_str($event['postback']['data'] ?? '', $data);
+
+                // VIPメニューの「履歴から予約」
                 if (($data['action'] ?? '') === 'vip_quick') {
-                    // 直近予約を元にクエリ生成（例）
                     $last = Reservation::where('line_user_id', $userId)
                         ->where('status', 'confirmed')
                         ->latest('reserved_at')
                         ->first();
 
-                    // 実運用では $last のメニュー/所要時間をクエリに埋めてプリセット
                     $url = url('/reserve/form?quick=1');
 
                     $notify->notifyUser($userId, "前回と同じ条件で予約できます：\n{$url}");
                 }
+
+                // 🆕 予約確認（リッチメニューから）
+                if (($data['action'] ?? '') === 'verify') {
+                    $reservation = Reservation::where('line_user_id', $userId)
+                        ->where('status', 'confirmed')
+                        ->latest('reserved_at')
+                        ->first();
+
+                    if ($reservation) {
+                        $url = route('reserve.verify', ['token' => $reservation->line_token]);
+                        $messageText = "✅ ご予約内容\n\n"
+                            . "日時：{$reservation->reserved_at}\n"
+                            . "メニュー：{$reservation->menu}\n\n"
+                            . "▼ キャンセル・確認はこちら：\n{$url}";
+                    } else {
+                        $messageText = "現在ご予約は登録されていません。";
+                    }
+
+                    if ($replyToken) {
+                        $line->replyMessage(new \LINE\Clients\MessagingApi\Model\ReplyMessageRequest([
+                            'replyToken' => $replyToken,
+                            'messages'   => [new \LINE\Clients\MessagingApi\Model\TextMessage([
+                                'type' => 'text',
+                                'text' => $messageText
+                            ])]
+                        ]));
+                    }
+                }
+
                 continue;
             }
         }
