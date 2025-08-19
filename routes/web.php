@@ -12,7 +12,8 @@ use App\Http\Controllers\Reserve\ReservationFormController;
 use App\Http\Controllers\LineWebhookController;
 use App\Http\Controllers\Admin\AdminChangePasswordController;
 use App\Http\Controllers\Admin\AdminController;
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 
 // ユーザー用
 Route::get('/', fn() => view('welcome'));
@@ -63,6 +64,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/login', [AdminAuthController::class, 'login']);
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 });
+
+//line userID取得
+Route::post('/line/webhook', function (Request $request) {
+    Log::debug('LINE Webhook event: ' . json_encode($request->all(), JSON_UNESCAPED_UNICODE));
+    return response()->json(['status' => 'ok']);
+});
+
 
 
 // ------------------------
