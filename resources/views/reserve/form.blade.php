@@ -76,23 +76,66 @@
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
+
 <script>
-document.addEventListener('DOMContentLoaded', async function () {
-  try {
-    const profile = await liff.getProfile();   // ← init不要
-    const lineUserId = profile.userId;
-    if (!lineUserId) {
-      alert('LINE認証に失敗しました。');
-      return;
+document.addEventListener('DOMContentLoaded', function () {
+  (async () => {
+    try {
+      // 1) SDKロード確認
+      if (typeof liff === 'undefined') {
+        alert('LIFF SDK が読み込まれていません。');
+        return;
+      }
+
+      // 2) ready を待つ（ミニアプリでも推奨）
+      await new Promise(resolve => {
+        if (liff.ready) {
+          // liff.ready は Promise ではなく thenable な場合がある
+          try { liff.ready.then(resolve); } catch(e) { resolve(); }
+        } else {
+          // 古い SDK 挙動対策
+          setTimeout(resolve, 0);
+        }
+      });
+
+      // 3) まず context から試す（ミニアプリならここで取れる）
+      let userId = null;
+      try {
+        const ctx = liff.getContext && liff.getContext();
+        userId = ctx && ctx.userId ? ctx.userId : null;
+      } catch (_) {}
+
+      // 4) だめなら profile から取得（profile スコープ必要）
+      if (!userId && liff.getProfile) {
+        try {
+          const profile = await liff.getProfile();
+          userId = profile && profile.userId ? profile.userId : null;
+        } catch (e) {
+          console.warn('getProfile 失敗:', e);
+        }
+      }
+
+      if (!userId) {
+        // 追加の診断情報
+        console.warn('診断情報:', {
+          href: location.href,
+          referrer: document.referrer,
+          inClient: (liff.isInClient ? liff.isInClient() : 'unknown')
+        });
+        alert('ユーザーIDを取得できませんでした（ミニアプリ起動URL/リダイレクト/スコープ設定を確認）。');
+        return;
+      }
+
+      document.getElementById('hidden_line_user_id').value = userId;
+      console.log('✅ LINE認証成功:', userId);
+    } catch (err) {
+      console.error('ミニアプリ初期化エラー詳細:', err);
+      alert('LINEミニアプリ環境でエラー');
     }
-    document.getElementById('hidden_line_user_id').value = lineUserId;
-    console.log("✅ LINE認証成功:", lineUserId);
-  } catch (err) {
-    alert('LINEミニアプリ環境でエラー');
-    console.error(err);
-  }
+  })();
 });
 </script>
+
 
 
 <script>
