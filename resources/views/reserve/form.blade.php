@@ -80,33 +80,71 @@
 -- JSまだ動いていません --
 </div>
 
+<div id="diag" style="white-space:pre-wrap;font-size:12px;color:#333;background:#f9f9f9;border:1px solid #ccc;padding:8px;margin-top:12px"></div>
+
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
   const diag = document.getElementById('diag');
+  const log = (msg, obj=null) => {
+    diag.textContent += msg + (obj ? " " + JSON.stringify(obj, null, 2) : "") + "\n";
+  };
+
   try {
-    diag.textContent = "✅ JS実行開始\n";
+    log("✅ JS開始");
 
     if (typeof liff === 'undefined') {
-      diag.textContent += "❌ liff 未定義（SDKが読み込めていない）\n";
+      log("❌ liff 未定義（SDKが読み込めていない）");
       return;
     }
+    log("✅ liff SDK 読み込み済み");
 
-    diag.textContent += "✅ liff SDK 読み込み済み\n";
-    diag.textContent += "inClient: " + (liff.isInClient ? liff.isInClient() : "不明") + "\n";
+    // 外部ブラウザかどうか
+    log("isInClient: " + (liff.isInClient ? liff.isInClient() : "不明"));
+    log("isLoggedIn: " + (liff.isLoggedIn ? liff.isLoggedIn() : "不明"));
 
+    // init試行
     try {
-      const ctx = liff.getContext();
-      diag.textContent += "ctx: " + JSON.stringify(ctx) + "\n";
+      await liff.init({ 
+        liffId: "{{ config('services.liff.id') }}",
+        withLoginOnExternalBrowser: true   // 外部ブラウザなら自動ログイン
+      });
+      log("✅ liff.init 成功");
     } catch (e) {
-      diag.textContent += "ctx error: " + e + "\n";
+      log("❌ liff.init エラー: " + e.message);
     }
 
-    diag.textContent += "-- 完了 --";
+    // Context取得
+    try {
+      const ctx = liff.getContext();
+      log("getContext:", ctx);
+    } catch (e) {
+      log("❌ getContext エラー: " + e.message);
+    }
+
+    // Profile取得
+    try {
+      const profile = await liff.getProfile();
+      log("getProfile:", profile);
+    } catch (e) {
+      log("❌ getProfile エラー: " + e.message);
+    }
+
+    // IDトークン
+    try {
+      const idToken = liff.getIDToken();
+      log("IDToken:", idToken);
+    } catch (e) {
+      log("❌ getIDToken エラー: " + e.message);
+    }
+
+    log("-- 完了 --");
+
   } catch (err) {
-    diag.textContent += "fatal: " + err;
+    diag.textContent += "fatal: " + err + "\n";
   }
 });
 </script>
+
 
 
 <script>
