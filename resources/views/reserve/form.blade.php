@@ -76,53 +76,35 @@
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-<div id="diag" style="white-space:pre-wrap;font-size:12px;color:#444;background:#f6f6f6;border:1px solid #ddd;padding:8px;margin-top:12px"></div>
+<div id="diag" style="white-space:pre-wrap;font-size:14px;color:#000;background:#eee;padding:10px;margin-top:20px">
+-- JSまだ動いていません --
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  (async () => {
-    const $ = id => document.getElementById(id);
-    const out = (obj) => { $('diag').textContent = JSON.stringify(obj, null, 2); };
+  const diag = document.getElementById('diag');
+  try {
+    diag.textContent = "✅ JS実行開始\n";
+
+    if (typeof liff === 'undefined') {
+      diag.textContent += "❌ liff 未定義（SDKが読み込めていない）\n";
+      return;
+    }
+
+    diag.textContent += "✅ liff SDK 読み込み済み\n";
+    diag.textContent += "inClient: " + (liff.isInClient ? liff.isInClient() : "不明") + "\n";
 
     try {
-      const info = {
-        href: location.href,
-        referrer: document.referrer,
-        sdkLoaded: typeof liff !== 'undefined',
-        inClient: (typeof liff !== 'undefined' && liff.isInClient ? liff.isInClient() : 'unknown'),
-      };
-
-      // ready待ち
-      if (typeof liff !== 'undefined' && liff.ready && liff.ready.then) {
-        await liff.ready;
-      }
-
-      // context / profile / idToken の順で試す
-      let ctx = null, profile = null, idTok = null, userId = null, errs = {};
-
-      try { ctx = liff.getContext && liff.getContext(); userId = ctx && ctx.userId; } catch(e){ errs.getContext = String(e); }
-      if (!userId) {
-        try { profile = await (liff.getProfile && liff.getProfile()); userId = profile && profile.userId; } catch(e){ errs.getProfile = String(e); }
-      }
-      if (!userId) {
-        try { idTok = liff.getDecodedIDToken && liff.getDecodedIDToken(); userId = idTok && idTok.sub; } catch(e){ errs.getDecodedIDToken = String(e); }
-      }
-
-      info.ctx = ctx;
-      info.profile = profile ? { userId: profile.userId, displayName: profile.displayName } : null;
-      info.idToken = idTok ? { sub: idTok.sub, amr: idTok.amr } : null;
-      info.resolvedUserId = userId || null;
-      info.errors = errs;
-
-      out(info);
-
-      if (userId) {
-        document.getElementById('hidden_line_user_id').value = userId;
-      }
-    } catch (err) {
-      out({ fatal: String(err) });
+      const ctx = liff.getContext();
+      diag.textContent += "ctx: " + JSON.stringify(ctx) + "\n";
+    } catch (e) {
+      diag.textContent += "ctx error: " + e + "\n";
     }
-  })();
+
+    diag.textContent += "-- 完了 --";
+  } catch (err) {
+    diag.textContent += "fatal: " + err;
+  }
 });
 </script>
 
