@@ -76,82 +76,56 @@
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
+<div id="diag" style="white-space:pre-wrap;font-size:12px;color:#444;background:#f6f6f6;border:1px solid #ddd;padding:8px;margin-top:12px"></div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  // 送信ボタンを準備：ID付与（無ければ）しておく
-  const submitBtn = document.querySelector('button[type="submit"]');
-  if (submitBtn) submitBtn.disabled = true;
-
   (async () => {
+    const $ = id => document.getElementById(id);
+    const out = (obj) => { $('diag').textContent = JSON.stringify(obj, null, 2); };
+
     try {
-      // 1) SDKが載ってるか
-      if (typeof liff === 'undefined') {
-        console.error('LIFF SDK not loaded');
-        alert('LINEミニアプリ環境でエラー（SDK未読込）');
-        return;
-      }
-
-      // 2) readyを待つ（ミニアプリでも稀に必要）
-      await new Promise(resolve => {
-        try { liff.ready && liff.ready.then(resolve); } catch (e) { resolve(); }
-        setTimeout(resolve, 0); // フォールバック
-      });
-
-      // 3) 最大2秒リトライで userId を取る（200ms間隔）
-      const tryGetUserId = async () => {
-        // a) context
-        try {
-          const ctx = liff.getContext && liff.getContext();
-          if (ctx && ctx.userId) return ctx.userId;
-        } catch {}
-
-        // b) profile（scope: profile が有効なら取れる）
-        try {
-          if (liff.getProfile) {
-            const profile = await liff.getProfile();
-            if (profile && profile.userId) return profile.userId;
-          }
-        } catch (e) { console.warn('getProfile fail:', e); }
-
-        // c) IDトークン（sub = userId）
-        try {
-          if (liff.getDecodedIDToken) {
-            const t = liff.getDecodedIDToken();
-            if (t && t.sub) return t.sub;
-          }
-        } catch (e) { console.warn('getDecodedIDToken fail:', e); }
-
-        return null;
+      const info = {
+        href: location.href,
+        referrer: document.referrer,
+        sdkLoaded: typeof liff !== 'undefined',
+        inClient: (typeof liff !== 'undefined' && liff.isInClient ? liff.isInClient() : 'unknown'),
       };
 
-      let userId = null;
-      for (let i = 0; i < 10; i++) { // 10回=約2秒
-        userId = await tryGetUserId();
-        if (userId) break;
-        await new Promise(r => setTimeout(r, 200));
+      // ready待ち
+      if (typeof liff !== 'undefined' && liff.ready && liff.ready.then) {
+        await liff.ready;
       }
 
+      // context / profile / idToken の順で試す
+      let ctx = null, profile = null, idTok = null, userId = null, errs = {};
+
+      try { ctx = liff.getContext && liff.getContext(); userId = ctx && ctx.userId; } catch(e){ errs.getContext = String(e); }
       if (!userId) {
-        console.warn('診断:', {
-          href: location.href,
-          referrer: document.referrer,
-          inClient: (liff.isInClient ? liff.isInClient() : 'unknown')
-        });
-        alert('LINE認証が完了していません。しばらく待ってからもう一度お試しください。');
-        return;
+        try { profile = await (liff.getProfile && liff.getProfile()); userId = profile && profile.userId; } catch(e){ errs.getProfile = String(e); }
+      }
+      if (!userId) {
+        try { idTok = liff.getDecodedIDToken && liff.getDecodedIDToken(); userId = idTok && idTok.sub; } catch(e){ errs.getDecodedIDToken = String(e); }
       }
 
-      document.getElementById('hidden_line_user_id').value = userId;
-      console.log('✅ LINE認証成功:', userId);
-      if (submitBtn) submitBtn.disabled = false;
+      info.ctx = ctx;
+      info.profile = profile ? { userId: profile.userId, displayName: profile.displayName } : null;
+      info.idToken = idTok ? { sub: idTok.sub, amr: idTok.amr } : null;
+      info.resolvedUserId = userId || null;
+      info.errors = errs;
 
+      out(info);
+
+      if (userId) {
+        document.getElementById('hidden_line_user_id').value = userId;
+      }
     } catch (err) {
-      console.error('ミニアプリ初期化エラー詳細:', err);
-      alert('LINEミニアプリ環境でエラー');
+      out({ fatal: String(err) });
     }
   })();
 });
 </script>
+
 
 <script>
 // 入力チェックとhiddenへのコピー
