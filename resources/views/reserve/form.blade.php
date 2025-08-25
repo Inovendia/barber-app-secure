@@ -75,21 +75,15 @@
 </x-guest-layout>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', async function () {
+document.addEventListener('DOMContentLoaded', function () {
     try {
-        await liff.init({ liffId: '{{ config('services.liff.id') }}' });
-
-        if (!liff.isInClient()) {
-            alert("LINEアプリ内で開いてください。");
-            return;
-        }
-
         const context = liff.getContext();
         const lineUserId = context.userId;
 
         if (!lineUserId) {
-            alert('LINE認証に失敗しました。友だち追加やLIFF設定をご確認ください。');
+            alert('LINE認証に失敗しました。友だち追加をご確認ください。');
             return;
         }
 
@@ -97,11 +91,12 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.log("✅ LINE認証成功: " + lineUserId);
 
     } catch (err) {
-        alert('LIFFの初期化に失敗しました');
+        alert('LINEミニアプリ環境でエラー');
         console.error(err);
     }
 });
 </script>
+
 
 <script>
 // 入力チェックとhiddenへのコピー
