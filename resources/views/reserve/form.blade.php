@@ -76,58 +76,75 @@
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  // 送信ボタンを準備：ID付与（無ければ）しておく
+  const submitBtn = document.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.disabled = true;
+
   (async () => {
     try {
-      // 1) SDKロード確認
+      // 1) SDKが載ってるか
       if (typeof liff === 'undefined') {
-        alert('LIFF SDK が読み込まれていません。');
+        console.error('LIFF SDK not loaded');
+        alert('LINEミニアプリ環境でエラー（SDK未読込）');
         return;
       }
 
-      // 2) ready を待つ（ミニアプリでも推奨）
+      // 2) readyを待つ（ミニアプリでも稀に必要）
       await new Promise(resolve => {
-        if (liff.ready) {
-          // liff.ready は Promise ではなく thenable な場合がある
-          try { liff.ready.then(resolve); } catch(e) { resolve(); }
-        } else {
-          // 古い SDK 挙動対策
-          setTimeout(resolve, 0);
-        }
+        try { liff.ready && liff.ready.then(resolve); } catch (e) { resolve(); }
+        setTimeout(resolve, 0); // フォールバック
       });
 
-      // 3) まず context から試す（ミニアプリならここで取れる）
-      let userId = null;
-      try {
-        const ctx = liff.getContext && liff.getContext();
-        userId = ctx && ctx.userId ? ctx.userId : null;
-      } catch (_) {}
-
-      // 4) だめなら profile から取得（profile スコープ必要）
-      if (!userId && liff.getProfile) {
+      // 3) 最大2秒リトライで userId を取る（200ms間隔）
+      const tryGetUserId = async () => {
+        // a) context
         try {
-          const profile = await liff.getProfile();
-          userId = profile && profile.userId ? profile.userId : null;
-        } catch (e) {
-          console.warn('getProfile 失敗:', e);
-        }
+          const ctx = liff.getContext && liff.getContext();
+          if (ctx && ctx.userId) return ctx.userId;
+        } catch {}
+
+        // b) profile（scope: profile が有効なら取れる）
+        try {
+          if (liff.getProfile) {
+            const profile = await liff.getProfile();
+            if (profile && profile.userId) return profile.userId;
+          }
+        } catch (e) { console.warn('getProfile fail:', e); }
+
+        // c) IDトークン（sub = userId）
+        try {
+          if (liff.getDecodedIDToken) {
+            const t = liff.getDecodedIDToken();
+            if (t && t.sub) return t.sub;
+          }
+        } catch (e) { console.warn('getDecodedIDToken fail:', e); }
+
+        return null;
+      };
+
+      let userId = null;
+      for (let i = 0; i < 10; i++) { // 10回=約2秒
+        userId = await tryGetUserId();
+        if (userId) break;
+        await new Promise(r => setTimeout(r, 200));
       }
 
       if (!userId) {
-        // 追加の診断情報
-        console.warn('診断情報:', {
+        console.warn('診断:', {
           href: location.href,
           referrer: document.referrer,
           inClient: (liff.isInClient ? liff.isInClient() : 'unknown')
         });
-        alert('ユーザーIDを取得できませんでした（ミニアプリ起動URL/リダイレクト/スコープ設定を確認）。');
+        alert('LINE認証が完了していません。しばらく待ってからもう一度お試しください。');
         return;
       }
 
       document.getElementById('hidden_line_user_id').value = userId;
       console.log('✅ LINE認証成功:', userId);
+      if (submitBtn) submitBtn.disabled = false;
+
     } catch (err) {
       console.error('ミニアプリ初期化エラー詳細:', err);
       alert('LINEミニアプリ環境でエラー');
@@ -135,8 +152,6 @@ document.addEventListener('DOMContentLoaded', function () {
   })();
 });
 </script>
-
-
 
 <script>
 // 入力チェックとhiddenへのコピー
