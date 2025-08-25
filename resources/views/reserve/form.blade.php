@@ -77,23 +77,20 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    try {
-        const context = liff.getContext();
-        const lineUserId = context.userId;
-
-        if (!lineUserId) {
-            alert('LINE認証に失敗しました。友だち追加をご確認ください。');
-            return;
-        }
-
-        document.getElementById('hidden_line_user_id').value = lineUserId;
-        console.log("✅ LINE認証成功: " + lineUserId);
-
-    } catch (err) {
-        alert('LINEミニアプリ環境でエラー');
-        console.error(err);
+document.addEventListener('DOMContentLoaded', async function () {
+  try {
+    const profile = await liff.getProfile();   // ← init不要
+    const lineUserId = profile.userId;
+    if (!lineUserId) {
+      alert('LINE認証に失敗しました。');
+      return;
     }
+    document.getElementById('hidden_line_user_id').value = lineUserId;
+    console.log("✅ LINE認証成功:", lineUserId);
+  } catch (err) {
+    alert('LINEミニアプリ環境でエラー');
+    console.error(err);
+  }
 });
 </script>
 
