@@ -129,9 +129,9 @@ function updateMenuOptions() {
     const myReservesLink = document.getElementById('my-reserves-link');
 
     try {
-        const liffId = @json($shop->liff_id ?? config('services.line.liff_id') ?? null);
+        const liffId = @json($shop->liff_id ?? config('services.line.id') ?? null);
         if (!liffId) {
-            diag('❌ LIFF ID 未設定（$shop->liff_id または services.line.liff_id を設定してください）');
+            diag('❌ LIFF ID 未設定（$shop->liff_id または services.line.id を設定してください）');
             return;
         }
 
