@@ -113,26 +113,47 @@ class LineWebhookController extends Controller
         return response('OK', 200);
     }
 
-    /**
-     * 直近の確定予約から返信文を作る
-     */
-    private function buildReservationMessage(string $lineUserId): string
-    {
-        $reservation = Reservation::where('line_user_id', $lineUserId)
-            ->where('status', 'confirmed')
-            ->latest('reserved_at')
-            ->first();
+    protected $bot;
 
-        if (! $reservation) {
-            return '現在、確認できるご予約はありません。';
+    public function __construct()
+    {
+        $this->bot = app('line-bot'); // ServiceProviderでbind済み想定
+    }
+
+    public function handle(Request $request)
+    {
+        $events = $request->input('events', []);
+
+        foreach ($events as $event) {
+            $replyToken = $event['replyToken'] ?? null;
+
+            if (($event['type'] ?? '') === 'postback') {
+                $data = $event['postback']['data'] ?? '';
+                if ($data === 'reservation_check') {
+                    $userId = $event['source']['userId'] ?? null;
+
+                    // ユーザーの最新予約を取得
+                    $reservation = Reservation::where('line_user_id', $userId)
+                        ->latest('reserved_at')
+                        ->first();
+
+                    $messageText = $reservation
+                        ? "ご予約内容\n日時: {$reservation->reserved_at}\nメニュー: {$reservation->menu}"
+                        : "現在、ご予約はありません。";
+
+                    $this->bot->replyMessage(new ReplyMessageRequest([
+                        'replyToken' => $replyToken,
+                        'messages' => [
+                            new TextMessage([
+                                'type' => 'text',
+                                'text' => $messageText,
+                            ]),
+                        ],
+                    ]));
+                }
+            }
         }
 
-        // ここはあなたの実装に合わせて調整（token/メニュー項目名など）
-        $url = route('reserve.verify', ['token' => $reservation->line_token]);
-
-        return "✅ ご予約内容\n\n"
-            . "日時：{$reservation->reserved_at}\n"
-            . "メニュー：{$reservation->menu}\n\n"
-            . "▼ キャンセル・確認はこちら：\n{$url}";
+        return response()->json(['status' => 'ok']);
     }
 }
