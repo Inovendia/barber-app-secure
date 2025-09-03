@@ -34,6 +34,9 @@ class ReservationFormController extends Controller
 
     public function store(Request $request, $token)
     {
+
+        \Log::debug('予約リクエスト受信', $request->all());
+
         $validated = $request->validate([
             'line_user_id' => 'required|string',
             'name' => 'required|string|max:255',
