@@ -263,15 +263,19 @@ class ReservationFormController extends Controller
 
     public function verify(Request $request)
     {
-        $token = $request->query('token');
+        $lineUserId = $request->query('line_user_id');
+        if (!$lineUserId) {
+            abort(400, 'LINEユーザーIDが必要です');
+        }
 
-        $reservation = Reservation::where('line_token', $token)->firstOrFail();
+        $reservation = Reservation::where('line_user_id', $lineUserId)
+            ->where('status', 'confirmed')
+            ->where('start_time', '>=', now())   // 未来のみ
+            ->orderBy('start_time', 'asc')      // 一番近い
+            ->first();
 
-        return view('reserve.confirm', [
-            'reservations' => collect([$reservation]), // 単一予約でも繰り返し処理可能に
-            'reservation' => $reservation,
-            'lineUserId' => $reservation->user->line_user_id ?? null, // 戻るリンクなどで使うなら
-        ]);
+        return view('reserve.verify', compact('reservation'));
     }
+
 
 }
