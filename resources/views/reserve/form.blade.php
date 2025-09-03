@@ -164,7 +164,7 @@ function updateMenuOptions() {
             submitBtn.classList.remove('opacity-50','cursor-not-allowed');
 
             // 「現在の予約を確認する」リンクも動的に活性化
-            const verifyBase = @json(route('reserve.verify', ['token' => $shop->public_token]));
+            const verifyBase = @json(route('reserve.verify'));
             myReservesLink.href = verifyBase + '?line_user_id=' + encodeURIComponent(userId);
             myReservesLink.classList.remove('hidden');
 
