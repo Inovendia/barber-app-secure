@@ -79,6 +79,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::prefix('admin')->middleware('auth:admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
+    Route::post('/reservations/{id}/cancel', [ReservationController::class, 'cancel'])
+    ->name('reservations.cancel');
+
     Route::get('/shop', [ShopController::class, 'edit'])->name('shop.edit');
     Route::post('/shop', [ShopController::class, 'update'])->name('shop.update');
 
