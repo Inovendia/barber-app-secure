@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Shop;
 use Carbon\Carbon;
 use App\Models\CalenderMark;
+use App\Services\LineNotificationService;
 
 class ReservationController extends Controller
 {
@@ -163,5 +164,16 @@ class ReservationController extends Controller
         session()->forget('reservation_data');
 
         return redirect()->route('admin.dashboard')->with('status', '予約を追加しました');
+    }
+
+    public function cancel($id)
+    {
+        $reservation = Reservation::findOrFail($id);
+
+        // 共通メソッドでキャンセル＋通知
+        $reservation->cancelWithNotification($this->lineService);
+
+        return redirect()->route('admin.dashboard')
+            ->with('status', '予約をキャンセルしました');
     }
 }
