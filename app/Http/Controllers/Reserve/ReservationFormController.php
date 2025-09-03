@@ -106,11 +106,13 @@ class ReservationFormController extends Controller
 
     public function cancel(Request $request)
     {
-        $reservation = \App\Models\Reservation::where('id', $request->reservation_id)
+        $reservation = Reservation::where('id', $request->reservation_id)
             ->where('line_token', $request->line_token)
             ->firstOrFail();
-        $reservation->status = 'canceled';
-        $reservation->save();
+
+        // 共通メソッドを呼び出し
+        $reservation->cancelWithNotification($this->lineService);
+
         return redirect()->back()->with('status', '予約をキャンセルしました');
     }
 
