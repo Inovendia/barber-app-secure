@@ -41,7 +41,7 @@ require __DIR__.'/auth.php';
 // LINEミニアプリ予約関連（店舗別予約URL対応）
 Route::prefix('reserve/{token}')->name('reserve.')->group(function () {
     Route::get('/form', [ReservationFormController::class, 'create'])->name('form');
-    Route::get('/calendar', [ReservationFormController::class, 'calender'])->name('calender');
+    Route::post('/calendar', [ReservationFormController::class, 'calender'])->name('calender');
     Route::post('/confirmation', [ReservationFormController::class, 'showConfirmation'])->name('confirmation');
     Route::post('/complete', [ReservationFormController::class, 'store'])->name('store');
 });
