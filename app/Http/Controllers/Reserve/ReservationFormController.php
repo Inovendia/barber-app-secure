@@ -274,7 +274,10 @@ class ReservationFormController extends Controller
             ->orderBy('reserved_at', 'asc')      // 一番近い
             ->first();
 
-        return view('reserve.confirm', compact('reservation'));
+        return view('reserve.confirm', [
+            'reservations' => $reservation ? collect([$reservation]) : collect([]),
+            'reservation'  => $reservation,
+        ]);
     }
 
 
