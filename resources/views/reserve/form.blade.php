@@ -23,7 +23,7 @@
             </div>
         @endif
 
-        <form method="GET" action="{{ route('reserve.calender', ['token' => $shop->public_token]) }}" onsubmit="return checkBeforeSubmit();">
+        <form method="POST" action="{{ route('reserve.calender', ['token' => $shop->public_token]) }}" onsubmit="return checkBeforeSubmit();">
             @csrf
             <input type="hidden" name="line_user_id" value="" id="hidden_line_user_id">
             <input type="hidden" name="name" id="hidden_name">
