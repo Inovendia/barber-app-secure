@@ -47,13 +47,8 @@ Route::prefix('reserve/{token}')->name('reserve.')->group(function () {
 });
 
 // 共通処理（予約確認・キャンセルなど）
-// 共通処理（予約確認・キャンセルなど）
-Route::get('/reserve/{token}/verify', [ReservationFormController::class, 'verify'])
-    ->name('reserve.verify');
-
-Route::post('/reserve/{token}/cancel', [ReservationFormController::class, 'cancel'])
-    ->name('reserve.cancel');
-
+Route::get('/reserve/verify', [ReservationFormController::class, 'verify'])->name('reserve.verify');
+Route::post('/reserve/cancel', [ReservationFormController::class, 'cancel'])->name('reserve.cancel');
 
 // テストビュー（任意）
 Route::get('/test-calender', fn() => view('reserve.calender'));

@@ -261,36 +261,17 @@ class ReservationFormController extends Controller
         ]);
     }
 
-    public function verify(Request $request, $token)
+    public function verify(Request $request)
     {
-        // 店舗特定
-        $shop = Shop::where('public_token', $token)->firstOrFail();
+        $token = $request->query('token');
 
-        // LINEユーザーIDをクエリから取得
-        $lineUserId = $request->query('line_user_id');
-        if (!$lineUserId) {
-            abort(400, 'LINEユーザーIDが必要です');
-        }
+        $reservation = Reservation::where('line_token', $token)->firstOrFail();
 
-        // 対象ユーザーの予約を取得（直近のものをすべて）
-        $reservations = Reservation::where('shop_id', $shop->id)
-            ->where('line_user_id', $lineUserId)
-            ->where('status', 'confirmed')
-            ->orderBy('start_time', 'asc')
-            ->get();
-
-        // 1件もなければエラーハンドリング（空画面にする or 404）
-        if ($reservations->isEmpty()) {
-            return view('reserve.verify', [
-                'shop' => $shop,
-                'reservations' => collect(), // 空コレクションを渡す
-            ]);
-        }
-
-        return view('reserve.verify', [
-            'shop' => $shop,
-            'reservations' => $reservations,
-            'lineUserId' => $lineUserId,
+        return view('reserve.confirm', [
+            'reservations' => collect([$reservation]), // 単一予約でも繰り返し処理可能に
+            'reservation' => $reservation,
+            'lineUserId' => $reservation->user->line_user_id ?? null, // 戻るリンクなどで使うなら
         ]);
     }
+
 }
