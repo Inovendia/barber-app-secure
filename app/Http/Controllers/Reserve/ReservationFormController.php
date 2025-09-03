@@ -270,8 +270,8 @@ class ReservationFormController extends Controller
 
         $reservation = Reservation::where('line_user_id', $lineUserId)
             ->where('status', 'confirmed')
-            ->where('start_time', '>=', now())   // 未来のみ
-            ->orderBy('start_time', 'asc')      // 一番近い
+            ->where('reserved_at', '>=', now())   // 未来のみ
+            ->orderBy('reserved_at', 'asc')      // 一番近い
             ->first();
 
         return view('reserve.verify', compact('reservation'));
