@@ -17,7 +17,8 @@ class Reservation extends Model
         'reserved_at',
         'status',
         'note',
-        'line_token'
+        'line_token',
+        'line_user_id',
     ];
 
     protected $casts = [
