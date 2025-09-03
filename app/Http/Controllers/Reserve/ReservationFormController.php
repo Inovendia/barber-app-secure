@@ -61,7 +61,7 @@ class ReservationFormController extends Controller
             'category' => $validated['category'],
             'menu' => $validated['menu'],
             'reserved_at' => $validated['reserved_at'],
-            'status' => 'pending',
+            'status' => 'confirmed',
             'line_token' => Str::random(40),
             'line_user_id' => $validated['line_user_id'],
         ]);
