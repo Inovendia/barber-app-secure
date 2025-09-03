@@ -60,6 +60,7 @@ class ReservationFormController extends Controller
             'reserved_at' => $validated['reserved_at'],
             'status' => 'pending',
             'line_token' => Str::random(40),
+            'line_user_id' => $validated['line_user_id'],
         ]);
 
         // LINE通知内容の作成
