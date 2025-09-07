@@ -10,12 +10,12 @@
 
     <div class="p-6 text-gray-800">
 
-        {{-- ↓ サーバで既に取得済みのときだけ表示していたリンクは一旦JSで制御するため置き換え --}}
-        <div class="mb-4 text-right">
-            <a id="my-reserves-link" href="#" class="text-blue-600 hover:underline text-sm hidden">
-                👉 現在の予約を確認する
-            </a>
-        </div>
+    <div class="mb-4 text-right">
+        <a id="my-reserves-link" href="{{ route('reserve.my') }}" class="text-blue-600 hover:underline text-sm">
+            👉 現在の予約を確認する
+        </a>
+    </div>
+
 
         @if (session('status'))
             <div class="mb-4 text-green-600 font-semibold">
@@ -117,63 +117,39 @@ function updateMenuOptions() {
     }
 }
 
-// ===== LIFF 初期化 → ログイン → userId格納 =====
 (async () => {
-    const diag = (msg) => {
-        const el = document.getElementById('diag');
-        el.textContent += (msg + '\n');
-    };
-
     const submitBtn = document.getElementById('submitBtn');
     const hiddenUserId = document.getElementById('hidden_line_user_id');
-    const myReservesLink = document.getElementById('my-reserves-link');
 
     try {
         const liffId = @json($shop->liff_id ?? config('services.liff.id') ?? null);
-        if (!liffId) {
-            diag('❌ LIFF ID 未設定（$shop->liff_id または services.liff.id を設定してください）');
-            return;
-        }
+        if (!liffId) return;
 
         await liff.init({ liffId });
-        diag('✅ LIFF init OK. inClient=' + liff.isInClient() + ', isLoggedIn=' + liff.isLoggedIn());
 
         if (!liff.isLoggedIn()) {
-            diag('↪️ ログインへリダイレクト');
-            // ここで戻ってくるので以降の処理は実行されない
             return liff.login({ redirectUri: window.location.href });
         }
 
-        // まずはIDトークン（sub）を取得
-        const decoded = liff.getDecodedIDToken?.();
-        let userId = decoded?.sub || null;
+        let userId = null;
 
-        // 取れる環境では profile.userId を優先（LINE内での "Uxxx..." 形式）
+        // profile.userId を優先
         try {
             const profile = await liff.getProfile();
             if (profile?.userId) userId = profile.userId;
-            diag('👤 profile.userId = ' + (profile?.userId || 'null'));
         } catch (e) {
-            diag('⚠️ getProfile失敗（ブラウザ外など）。decoded.subで継続。');
+            const decoded = liff.getDecodedIDToken?.();
+            userId = decoded?.sub || null;
         }
 
         if (userId) {
             hiddenUserId.value = userId;
-            // 送信ボタンを有効化
             submitBtn.disabled = false;
-            submitBtn.classList.remove('opacity-50','cursor-not-allowed');
-
-            // 「現在の予約を確認する」リンクも動的に活性化
-            const verifyBase = @json(route('reserve.verify'));
-            myReservesLink.href = verifyBase + '?line_user_id=' + encodeURIComponent(userId);
-            myReservesLink.classList.remove('hidden');
-
-            diag('✅ userId set: ' + userId);
-        } else {
-            diag('❌ userIdが取得できませんでした（LIFF権限/チャネル設定を確認）');
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
     } catch (err) {
-        diag('❌ LIFF初期化エラー: ' + (err?.message || err));
+        console.error('LIFF初期化エラー:', err);
     }
 })();
+
 </script>
