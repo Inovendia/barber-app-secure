@@ -290,24 +290,29 @@ class ReservationFormController extends Controller
             abort(400, '予約トークンが必要です');
         }
 
+        // ★ トークンだけで取得し、状態は後段で判定する
         $reservation = Reservation::where('line_token', $token)
-            ->where('status', 'confirmed')
-            ->where('reserved_at', '>=', now())
             ->with('shop', 'user')
             ->firstOrFail();
 
+        // すでにキャンセル済みなら、404にせず完了画面を出す
         if ($reservation->status === 'canceled') {
             return view('reserve.cancel_complete', [
-                'reservation'      => $reservation,
-                'alreadyCanceled'  => true,
+                'reservation'     => $reservation,
+                'alreadyCanceled' => true,
             ]);
         }
+
+        // ここまで来たら（キャンセルされていない）予約の確認画面
+        // ※もし「過去の予約はメッセージを出したい」ならここで分岐を追加してください
+        // if ($reservation->reserved_at->lt(now())) { ... }
 
         return view('reserve.confirm', [
             'reservations' => collect([$reservation]),
             'reservation'  => $reservation,
         ]);
     }
+
 
     // ReservationFormController.php
 
