@@ -27,13 +27,13 @@
                         <p class="text-sm mt-1"><span class="font-semibold">ステータス：</span>{{ $r->status }}</p>
 
                         <form method="POST" action="{{ route('reserve.cancel') }}" class="mt-4">
-                            @csrf
-                            <input type="hidden" name="reservation_id" value="{{ $r->id }}">
-                            <input type="hidden" name="line_token" value="{{ $r->line_token }}">
-                            <button type="submit" class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 text-sm">
-                                キャンセルする
-                            </button>
-                        </form>
+                        @csrf
+                        <input type="hidden" name="line_token" value="{{ $r->line_token }}">
+                        <button type="submit" class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 text-sm">
+                            キャンセルする
+                        </button>
+                    </form>
+
                     </li>
                 @endif
             @endforeach

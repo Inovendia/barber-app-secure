@@ -106,16 +106,13 @@ class ReservationFormController extends Controller
 
     public function cancel(Request $request)
     {
-        $reservation = Reservation::where('id', $request->reservation_id)
-            ->where('line_token', $request->line_token)
+        $reservation = Reservation::where('line_token', $request->line_token)
             ->firstOrFail();
 
-        // 共通メソッドを呼び出し
         $reservation->cancelWithNotification($this->lineService);
 
         return redirect()->back()->with('status', '予約をキャンセルしました');
     }
-
 
     public function calender(Request $request, $token)
     {
@@ -265,22 +262,46 @@ class ReservationFormController extends Controller
 
     public function verify(Request $request)
     {
-        $lineUserId = $request->query('line_user_id');
-        if (!$lineUserId) {
-            abort(400, 'LINEユーザーIDが必要です');
+        $token = $request->query('token');
+        if (!$token) {
+            abort(400, '予約トークンが必要です');
         }
 
-        $reservation = Reservation::where('line_user_id', $lineUserId)
+        $reservation = Reservation::where('line_token', $token)
             ->where('status', 'confirmed')
-            ->where('reserved_at', '>=', now())   // 未来のみ
-            ->orderBy('reserved_at', 'asc')      // 一番近い
-            ->first();
+            ->where('reserved_at', '>=', now())
+            ->with('shop', 'user')
+            ->firstOrFail();
 
         return view('reserve.confirm', [
-            'reservations' => $reservation ? collect([$reservation]) : collect([]),
+            'reservations' => collect([$reservation]),
             'reservation'  => $reservation,
         ]);
     }
 
+    // ReservationFormController.php
+
+    public function my()
+    {
+        return view('reserve.my'); // LIFF入口用ビュー
+    }
+
+    public function resolve(Request $request)
+    {
+        $lineUserId = $request->input('line_user_id');
+        if (!$lineUserId) {
+            return response()->json(['error' => 'line_user_id is required'], 400);
+        }
+
+        $reservation = Reservation::where('line_user_id', $lineUserId)
+            ->where('status', 'confirmed')
+            ->where('reserved_at', '>=', now())
+            ->orderBy('reserved_at', 'asc')
+            ->first();
+
+        return response()->json([
+            'token' => $reservation?->line_token
+        ]);
+    }
 
 }
