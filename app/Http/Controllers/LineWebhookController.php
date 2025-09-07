@@ -104,7 +104,7 @@ class LineWebhookController extends Controller
                             ->first();
 
                         if ($reservation) {
-                            $url = route('reserve.verify') . '?line_user_id=' . urlencode($userId);
+                            $url = route('reserve.verify') . '?token=' . urlencode($reservation->line_token);
                             $messageText = "✅ ご予約内容\n\n"
                                 . "日時：{$reservation->reserved_at}\n"
                                 . "メニュー：{$reservation->menu}\n\n"

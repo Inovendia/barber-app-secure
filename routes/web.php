@@ -56,6 +56,11 @@ Route::get('/test-calender', fn() => view('reserve.calender'));
 // LINE Webhook
 Route::post('/webhook', [LineWebhookController::class, 'handle']);
 
+// token認証用
+Route::get('/reserve/my', [ReservationFormController::class, 'my'])->name('reserve.my');
+Route::post('/reserve/resolve', [ReservationFormController::class, 'resolve'])->name('reserve.resolve');
+
+
 // ------------------------
 // 管理者認証不要エリア
 // ------------------------
