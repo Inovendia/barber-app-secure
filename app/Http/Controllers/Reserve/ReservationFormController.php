@@ -106,26 +106,35 @@ class ReservationFormController extends Controller
 
     public function cancel(Request $request)
     {
-        $reservation = Reservation::where('line_token', $request->line_token)->first();
+        $request->validate([
+            'line_token' => 'required|string',
+        ]);
+
+        $reservation = Reservation::where('line_token', $request->line_token)
+            ->with('shop','user')
+            ->first();
 
         if (!$reservation) {
-            abort(404); // 本当に存在しない
+            abort(404); // トークン自体が不正
         }
 
+        // すでにキャンセル済みならそのまま完了画面へ
         if ($reservation->status === 'canceled') {
             return view('reserve.cancel_complete', [
-                'reservation' => $reservation,
-                'alreadyCanceled' => true,
+                'reservation'      => $reservation,
+                'alreadyCanceled'  => true,
             ]);
         }
 
+        // 初回キャンセル処理
         $reservation->cancelWithNotification($this->lineService);
 
         return view('reserve.cancel_complete', [
-            'reservation' => $reservation,
-            'alreadyCanceled' => false,
+            'reservation'      => $reservation,
+            'alreadyCanceled'  => false,
         ]);
     }
+
 
 
     public function calender(Request $request, $token)
@@ -286,6 +295,13 @@ class ReservationFormController extends Controller
             ->where('reserved_at', '>=', now())
             ->with('shop', 'user')
             ->firstOrFail();
+
+        if ($reservation->status === 'canceled') {
+            return view('reserve.cancel_complete', [
+                'reservation'      => $reservation,
+                'alreadyCanceled'  => true,
+            ]);
+        }
 
         return view('reserve.confirm', [
             'reservations' => collect([$reservation]),
