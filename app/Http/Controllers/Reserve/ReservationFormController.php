@@ -111,7 +111,8 @@ class ReservationFormController extends Controller
 
         $reservation->cancelWithNotification($this->lineService);
 
-        return redirect()->back()->with('status', '予約をキャンセルしました');
+        return redirect()->route('reserve.verify', ['token' => $reservation->line_token])
+        ->with('status', '予約をキャンセルしました');
     }
 
     public function calender(Request $request, $token)
