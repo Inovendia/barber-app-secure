@@ -10,11 +10,11 @@
 
     <div class="p-6 text-gray-800">
 
-    <div class="mb-4 text-right">
+    <!-- <div class="mb-4 text-right">
         <a id="my-reserves-link" href="{{ route('reserve.my') }}" class="text-blue-600 hover:underline text-sm">
             👉 現在の予約を確認する
         </a>
-    </div>
+    </div> -->
 
 
         @if (session('status'))
@@ -67,9 +67,6 @@
                 日時選択へ進む
             </button>
         </form>
-
-        {{-- 簡易デバッグ出力 --}}
-        <div id="diag" class="mt-3" style="white-space:pre-wrap;font-size:12px;color:#444;background:#f6f6f6;border:1px solid #ddd;padding:8px;"></div>
     </div>
 </x-guest-layout>
 

@@ -4,7 +4,12 @@
     </x-slot>
 
     <div class="p-6 text-gray-800">
-        <p class="text-lg mb-4">ご予約をキャンセルしました。</p>
+        @if (!empty($alreadyCanceled) && $alreadyCanceled)
+            <p class="text-red-600 text-lg mb-4">この予約はすでにキャンセル済みです。</p>
+        @else
+            <p class="text-green-600 text-lg mb-4">ご予約をキャンセルしました。</p>
+        @endif
+
         <p>日時：{{ $reservation->reserved_at->format('Y年m月d日 H:i') }}</p>
         <p>メニュー：{{ $reservation->menu }}</p>
 
