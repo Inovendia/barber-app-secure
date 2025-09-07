@@ -106,15 +106,27 @@ class ReservationFormController extends Controller
 
     public function cancel(Request $request)
     {
-        $reservation = Reservation::where('line_token', $request->line_token)
-            ->firstOrFail();
+        $reservation = Reservation::where('line_token', $request->line_token)->first();
+
+        if (!$reservation) {
+            abort(404); // 本当に存在しない
+        }
+
+        if ($reservation->status === 'canceled') {
+            return view('reserve.cancel_complete', [
+                'reservation' => $reservation,
+                'alreadyCanceled' => true,
+            ]);
+        }
 
         $reservation->cancelWithNotification($this->lineService);
 
         return view('reserve.cancel_complete', [
-            'reservation' => $reservation
+            'reservation' => $reservation,
+            'alreadyCanceled' => false,
         ]);
     }
+
 
     public function calender(Request $request, $token)
     {
