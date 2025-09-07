@@ -111,7 +111,9 @@ class ReservationFormController extends Controller
 
         $reservation->cancelWithNotification($this->lineService);
 
-        return redirect()->route('reserve.verify') . '?token=' . $reservation->line_token;
+        return view('reserve.cancel_complete', [
+            'reservation' => $reservation
+        ]);
     }
 
     public function calender(Request $request, $token)
