@@ -13,5 +13,6 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         '/webhook', // LINE Webhook 用に CSRF をスキップ
+        '/line/webhook',
     ];
 }

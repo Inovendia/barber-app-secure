@@ -11,7 +11,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'line_user_id', 'name', 'phone',
+        'line_user_id', 'name', 'phone','shop_id'
     ];
 
     public function reservations()

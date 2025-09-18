@@ -36,6 +36,8 @@ class ReservationFormController extends Controller
     {
 
         \Log::debug('予約リクエスト受信', $request->all());
+        \Log::debug('Push対象 userId', ['userId' => $validated['line_user_id']]);
+
 
         $validated = $request->validate([
             'line_user_id' => 'required|string',
@@ -50,7 +52,7 @@ class ReservationFormController extends Controller
 
         // ユーザー情報を保存 or 更新
         $user = User::updateOrCreate(
-            ['line_user_id' => $validated['line_user_id']],
+            ['shop_id' => $shop->id, 'line_user_id' => $validated['line_user_id']],
             ['name' => $validated['name'], 'phone' => $validated['phone']]
         );
 
@@ -76,9 +78,15 @@ class ReservationFormController extends Controller
                 . "✂️ メニュー：{$reservation->menu}\n\n"
                 . "▼ ご確認・キャンセルはこちら：\n{$url}";
 
+        \Log::debug('notify target userId', [
+        'line_user_id' => $user->line_user_id,
+        'shop_id'      => $shop->id,
+        ]);
+
         // LINE通知送信（ユーザー／管理者）
-        $this->lineService->notifyUser($user->line_user_id, $message);
-        $this->lineService->notifyAdmin("新しい予約が入りました！\nメニュー: {$reservation->menu}\n日時: {$reservation->reserved_at}");
+        $this->lineService->notifyUser($shop, $user->line_user_id, $message);
+        $this->lineService->notifyAdmin($shop, "新しい予約が入りました！\nメニュー: {$reservation->menu}\n日時: {$reservation->reserved_at}");
+
 
         // セッション保存（フォーム戻りなどに使用）
         session(['line_user_id' => $validated['line_user_id']]);
@@ -90,16 +98,24 @@ class ReservationFormController extends Controller
 
     }
 
-    public function confirm(Request $request)
+    public function confirm(Request $request, $token)
     {
+        $shop = Shop::where('public_token', $token)->firstOrFail();
         $lineUserId = $request->query('line_user_id');
-        $user = User::where('line_user_id', $lineUserId)->first();
+
+        $user = User::where('shop_id', $shop->id)
+            ->where('line_user_id', $lineUserId)
+            ->first();
 
         if (!$user) {
-            return redirect()->route('reserve.form', ['token' => $request->query('token')])->with('status', '予約情報が見つかりませんでした。');
+            return redirect()->route('reserve.form', ['token' => $token])
+                ->with('status', '予約情報が見つかりませんでした。');
         }
 
-        $reservations = $user->reservations()->with('shop')->orderByDesc('reserved_at')->get();
+        $reservations = $user->reservations()
+            ->where('shop_id', $shop->id)
+            ->orderByDesc('reserved_at')
+            ->get();
 
         return view('reserve.confirm', compact('reservations', 'lineUserId'));
     }
@@ -321,21 +337,40 @@ class ReservationFormController extends Controller
         return view('reserve.my'); // LIFF入口用ビュー
     }
 
-    public function resolve(Request $request)
+    public function resolve(Request $request, $token)
     {
-        $lineUserId = $request->input('line_user_id');
-        if (!$lineUserId) {
+        $shop = Shop::where('public_token', $token)->firstOrFail();
+        $lineUserId = $request->string('line_user_id');
+
+        if ($lineUserId->isEmpty()) {
             return response()->json(['error' => 'line_user_id is required'], 400);
         }
 
-        $reservation = Reservation::where('line_user_id', $lineUserId)
+        $reservation = Reservation::where('shop_id', $shop->id)
+            ->where('line_user_id', $lineUserId) // ※将来は user_id に寄せてOK
             ->where('status', 'confirmed')
             ->where('reserved_at', '>=', now())
             ->orderBy('reserved_at', 'asc')
             ->first();
 
-        return response()->json([
-            'token' => $reservation?->line_token
+        return response()->json(['token' => $reservation?->line_token]);
+    }
+
+    public function entry(Request $request)
+    {
+        $shopToken = $request->query('shop_token'); // LIFF URL から渡すクエリ
+        $lineUserId = $request->query('line_user_id');
+
+        $shop = Shop::where('public_token', $shopToken)->first();
+
+        if (!$shop) {
+            abort(404, '店舗が見つかりません');
+        }
+
+        // /reserve/{token}/form にリダイレクト
+        return redirect()->route('reserve.form', [
+            'token' => $shop->public_token,
+            'line_user_id' => $lineUserId,
         ]);
     }
 

@@ -44,11 +44,14 @@ Route::prefix('reserve/{token}')->name('reserve.')->group(function () {
     Route::post('/calendar', [ReservationFormController::class, 'calender'])->name('calender');
     Route::post('/confirmation', [ReservationFormController::class, 'showConfirmation'])->name('confirmation');
     Route::post('/complete', [ReservationFormController::class, 'store'])->name('store');
+    Route::post('/resolve', [ReservationFormController::class, 'resolve'])->name('resolve');
+    Route::get('/confirm', [ReservationFormController::class, 'confirm'])->name('confirm');
 });
 
 // 共通処理（予約確認・キャンセルなど）
 Route::get('/reserve/verify', [ReservationFormController::class, 'verify'])->name('reserve.verify');
 Route::post('/reserve/cancel', [ReservationFormController::class, 'cancel'])->name('reserve.cancel');
+Route::get('/reserve/form-entry', [ReservationFormController::class, 'entry'])->name('reserve.entry');
 
 // テストビュー（任意）
 Route::get('/test-calender', fn() => view('reserve.calender'));
@@ -58,7 +61,7 @@ Route::post('/webhook', [LineWebhookController::class, 'handle']);
 
 // token認証用
 Route::get('/reserve/my', [ReservationFormController::class, 'my'])->name('reserve.my');
-Route::post('/reserve/resolve', [ReservationFormController::class, 'resolve'])->name('reserve.resolve');
+//Route::post('/reserve/resolve', [ReservationFormController::class, 'resolve'])->name('reserve.resolve');
 
 
 // ------------------------

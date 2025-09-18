@@ -145,8 +145,15 @@ class ReservationController extends Controller
         }
 
         $user = User::firstOrCreate(
-            ['phone' => $data['phone']],
-            ['name' => $data['name'], 'line_user_id' => null,'shop_id' => $admin->shop_id]
+            [
+                'phone'   => $data['phone'],
+                'shop_id' => $admin->shop_id,
+            ],
+            [
+                'name'         => $data['name'],
+                'line_user_id' => null,
+                'shop_id'      => $admin->shop_id,
+            ]
         );
 
         DB::transaction(function () use ($user, $data, $admin) {
