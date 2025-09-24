@@ -11,9 +11,16 @@ use App\Models\Shop;
 use Carbon\Carbon;
 use App\Models\CalenderMark;
 use App\Services\LineNotificationService;
+use Illuminate\Support\Facades\Auth;
 
 class ReservationController extends Controller
 {
+    protected $lineService;
+    public function __construct(LineNotificationService $lineService)
+    {
+        $this->lineService = $lineService;
+    }
+
     public function create()
     {
         return view('admin.create');
@@ -43,14 +50,14 @@ class ReservationController extends Controller
             'グレイカラー 2300円' => 120,
         ];
 
-        $admin = \Auth::guard('admin')->user();
+        $admin = Auth::guard('admin')->user();
 
         $menu = $request->menu;
         $duration = $menuDurations[$menu] ?? 60;
 
         $shop = $admin->shop;
         $closedDays = explode(',', $shop->closed_days ?? '');
-        $closedDayIndexes = collect(['日','月','火','水','木','金','土'])
+        $closedDayIndexes = collect(['日', '月', '火', '水', '木', '金', '土'])
             ->filter(fn($d) => in_array($d, $closedDays))
             ->keys()
             ->toArray();
@@ -58,16 +65,16 @@ class ReservationController extends Controller
         $startDate = $dates->first()->copy()->startOfDay();
         $endDate = $dates->last()->copy()->endOfDay();
         $confirmedReservations = Reservation::where('shop_id', $shop->id) // ✅ 追加
-        ->whereBetween('reserved_at', [$startDate, $endDate])
-        ->where('status', 'confirmed')
-        ->get();
+            ->whereBetween('reserved_at', [$startDate, $endDate])
+            ->where('status', 'confirmed')
+            ->get();
 
         $calenderMarks = CalenderMark::where('shop_id', $shop->id) // ✅ 追加
-        ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
-        ->get()
-        ->groupBy(function ($mark) {
-            return $mark->date . ' ' . \Carbon\Carbon::parse($mark->time)->format('H:i');
-        });
+            ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->get()
+            ->groupBy(function ($mark) {
+                return $mark->date . ' ' . \Carbon\Carbon::parse($mark->time)->format('H:i');
+            });
 
         return view('admin.admin_calender', [
             'dates' => $dates,
@@ -126,13 +133,11 @@ class ReservationController extends Controller
     {
         $data = session('reservation_data');
 
-        \Log::info('store() 直前のセッション内容:', $data);
-
         if (!$data) {
             return redirect()->route('admin.reservations.create')->withErrors(['message' => '再度ご入力ください。']);
         }
 
-        $admin = \Auth::guard('admin')->user();
+        $admin = Auth::guard('admin')->user();
 
         // 重複チェック
         $exists = Reservation::where('reserved_at', $data['reserved_at'])

@@ -35,10 +35,6 @@ class ReservationFormController extends Controller
     public function store(Request $request, $token)
     {
 
-        \Log::debug('予約リクエスト受信', $request->all());
-        \Log::debug('Push対象 userId', ['userId' => $validated['line_user_id']]);
-
-
         $validated = $request->validate([
             'line_user_id' => 'required|string',
             'name' => 'required|string|max:255',
@@ -71,18 +67,10 @@ class ReservationFormController extends Controller
         // LINE通知内容の作成
         $url = route('reserve.verify') . '?token=' . $reservation->line_token;
 
-        \Log::info('生成された予約確認URL', ['url' => $url]);
-
         $message = "✅ ご予約ありがとうございます！\n\n"
-                . "📅 日時：{$reservation->reserved_at->format('Y年m月d日 H:i')}\n"
-                . "✂️ メニュー：{$reservation->menu}\n\n"
-                . "▼ ご確認・キャンセルはこちら：\n{$url}";
-
-        \Log::debug('notify target userId', [
-        'line_user_id' => $user->line_user_id,
-        'shop_id'      => $shop->id,
-        ]);
-
+            . "📅 日時：{$reservation->reserved_at->format('Y年m月d日 H:i')}\n"
+            . "✂️ メニュー：{$reservation->menu}\n\n"
+            . "▼ ご確認・キャンセルはこちら：\n{$url}";
         // LINE通知送信（ユーザー／管理者）
         $this->lineService->notifyUser($shop, $user->line_user_id, $message);
         $this->lineService->notifyAdmin($shop, "新しい予約が入りました！\nメニュー: {$reservation->menu}\n日時: {$reservation->reserved_at}");
@@ -95,7 +83,6 @@ class ReservationFormController extends Controller
         return view('reserve.complete', [
             'reservation' => $reservation,
         ]);
-
     }
 
     public function confirm(Request $request, $token)
@@ -127,7 +114,7 @@ class ReservationFormController extends Controller
         ]);
 
         $reservation = Reservation::where('line_token', $request->line_token)
-            ->with('shop','user')
+            ->with('shop', 'user')
             ->first();
 
         if (!$reservation) {
@@ -154,8 +141,7 @@ class ReservationFormController extends Controller
 
 
     public function calender(Request $request, $token)
-    {
-        {
+    { {
             if (!$request->filled(['line_user_id', 'name', 'phone', 'category', 'menu'])) {
                 return redirect()->route('reserve.form')->with('status', '必要な情報が不足しています。');
             }
@@ -189,7 +175,7 @@ class ReservationFormController extends Controller
         $shop = Shop::where('public_token', $token)->firstOrFail();
         $shopId = $shop->id;
         $closedDays = explode(',', $shop->closed_days ?? '');
-        $closedDayIndexes = collect(['日','月','火','水','木','金','土'])
+        $closedDayIndexes = collect(['日', '月', '火', '水', '木', '金', '土'])
             ->filter(fn($d) => in_array($d, $closedDays))
             ->keys()
             ->toArray();
@@ -205,7 +191,7 @@ class ReservationFormController extends Controller
         $calenderMarks = CalenderMark::whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
             ->where('shop_id', $shopId)
             ->get()
-            ->groupBy(fn ($mark) => $mark->date . ' ' . substr($mark->time, 0, 5));
+            ->groupBy(fn($mark) => $mark->date . ' ' . substr($mark->time, 0, 5));
 
         $businessHours = [
             'start' => $shop->start_time,
@@ -278,7 +264,7 @@ class ReservationFormController extends Controller
         $shopId = $request->input('shop_id', 1); // デフォルト1店舗目
         $shop = Shop::findOrFail($shopId);
         $closedDays = explode(',', $shop->closed_days ?? '');
-        $closedDayIndexes = collect(['日','月','火','水','木','金','土'])
+        $closedDayIndexes = collect(['日', '月', '火', '水', '木', '金', '土'])
             ->filter(fn($d) => in_array($d, $closedDays))
             ->keys()
             ->toArray();
@@ -373,5 +359,4 @@ class ReservationFormController extends Controller
             'line_user_id' => $lineUserId,
         ]);
     }
-
 }

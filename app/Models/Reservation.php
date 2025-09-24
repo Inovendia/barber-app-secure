@@ -48,7 +48,7 @@ class Reservation extends Model
             . "📅 日時：{$this->reserved_at->format('Y年m月d日 H:i')}\n"
             . "✂️ メニュー：{$this->menu}";
 
-        $lineService->notifyUser($this->line_user_id, $messageUser);
+        $lineService->notifyUser($this->shop, $this->line_user_id, $messageUser);
 
         // 管理者通知
         $messageAdmin = "⚠️ キャンセルが発生しました\n\n"
@@ -57,6 +57,6 @@ class Reservation extends Model
             . "📅 日時：{$this->reserved_at->format('Y年m月d日 H:i')}\n"
             . "✂️ メニュー：{$this->menu}";
 
-        $lineService->notifyAdmin($messageAdmin);
+        $lineService->notifyAdmin($this->shop, $messageAdmin);
     }
 }
