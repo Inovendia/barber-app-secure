@@ -1,61 +1,59 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 床屋予約管理アプリ
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## サービス概要
+LINEミニアプリから簡単に予約ができる床屋向けの予約管理アプリです。  
+顧客は「メニュー選択 → 日時選択 → 確認 → 完了」の流れで直感的に予約可能。  
+管理者はWeb管理画面から予約状況や顧客メモを簡単に確認・操作できます。  
 
-## About Laravel
+## このサービスへの思い・作りたい理由
+床屋や小規模サロンでは、電話予約や紙のカレンダー管理が主流で、管理が煩雑になりがちです。  
+その結果、顧客一人のために営業する日もあり、光熱費と売上でトントンになる日すらあると知り合いの床屋に聞きました。  
+世の中にネット予約システムは数多く存在しますが、「ホットペッパーや大手サービスは高額で使いにくい」という声も少なくありません。
+そこで、**普段から誰もが使っているLINEからシームレスに予約でき、店舗側も簡単に管理できるアプリ**を作ろうと考えました。
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ユーザー層について
+- **顧客（一般ユーザー）**  
+  → 普段からLINEを利用しており、新しいアプリをインストールせずに予約したい層。  
+- **床屋・美容院の経営者**  
+  → 小規模店舗で予約を効率的に管理したい。低コストで導入したい層。  
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## サービスの利用イメージ
+- 顧客は店舗のLINE公式アカウントから「予約」ボタンを押し、メニュー・日時を選ぶだけで予約完了。  
+- 管理者は管理画面で「本日の予約一覧」「顧客メモ」を確認しながら対応可能。  
+- LINE通知により予約の確認・キャンセルもスムーズに行える。  
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## ユーザーの獲得について
+- 店舗オーナーに直接営業して導入してもらう（初期は知り合いの床屋からスタート）。  
+- 導入後はLINE公式アカウントを通じて顧客が自然に利用開始できる。  
+- 将来的には複数店舗で導入し、小規模サロン等の負を解消予定。 
 
-## Learning Laravel
+## サービスの差別化ポイント・推しポイント
+- **大手サービス（ホットペッパーなど）との違い**  
+  - 導入コストが安い（月額固定＋LINE連携のみ）。個人開発＋飛び込み営業のため無駄なコストがかからないから実現可能。  
+  - 余計なクーポンや広告表示がなく、予約に集中できるUI。  
+- **独自の強み**  
+  - LINEミニアプリでシームレスに利用できる点。  
+  - 管理者もカレンダーUIから直感的に予約を追加可能。  
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 機能候補
+- **MVPリリース時**
+  - 顧客用：メニュー選択 → 日時選択 → 予約完了フロー  
+  - 管理者用：予約一覧表示、予約の手動追加  
+  - LINE通知（予約完了・キャンセル通知）  
+- **本リリースまで**
+  - カレンダー記号（×・tel・◎など）の設定機能  
+  - 顧客メモ＋画像添付機能  
+  - LINEリッチメニュー連携  
+  - 店舗別の独自URL（public_token）での予約受付  
+  - 予約ステータス変更、ドラッグ＆ドロップでの管理UI  
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## 使用する技術スタック
+- **フレームワーク**: Laravel 10（Bladeテンプレートを使用）  
+- **データベース**: MySQL（Docker環境で構築）  
+- **デプロイ先**: AWS Lightsail（Docker構成）、S3（画像アップロード）、Lambda（LINE通知処理）  
+- **外部連携**: LINE Messaging API, LINEミニアプリ  
+- **ライブラリ/パッケージ**:  
+  - `linecorp/line-bot-sdk` (LINE通知処理)  
+  - `laravel/breeze` (管理者ログイン認証)  
+  - `alpine.js` (モーダル・UI改善)  
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development/)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
