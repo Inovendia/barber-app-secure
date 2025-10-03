@@ -1,61 +1,131 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 床屋予約管理アプリ
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## サービス概要
+LINEミニアプリから簡単に予約ができる床屋向けの予約管理アプリです。  
+顧客は「メニュー選択 → 日時選択 → 確認 → 完了」の流れで直感的に予約可能。  
+管理者はWeb管理画面から予約状況や顧客メモを簡単に確認・操作できます。  
 
-## About Laravel
+## このサービスへの思い・作りたい理由
+床屋や小規模サロンでは、電話予約や紙のカレンダー管理が主流で、管理が煩雑になりがちです。
+その結果、顧客一人のために営業する日もあり、光熱費と売上でトントンになる日すらあると知り合いの床屋に聞きました。
+世の中にネット予約システムは数多く存在しますが、「ホットペッパーや大手サービスは高額で、さらに操作画面が複雑で使いにくい」という声も少なくありません。
+実際、大手サービスでは クーポン作成・広告管理・分析機能などが必須で、シンプルに“予約だけ管理したい”店舗にとっては余計な操作が多い という課題があります。
+そこで、普段から誰もが使っているLINEからシームレスに予約でき、店舗側も“予約の管理”だけに集中できるアプリを作ろうと考えました。
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ユーザー層について
+- **顧客（一般ユーザー）**  
+  → 普段からLINEを利用しており、新しいアプリをインストールせずに予約したい層。  
+- **床屋・美容院の経営者**  
+  → 小規模店舗で予約を効率的に管理したい。低コストで導入したい層。  
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## サービスの利用イメージ
+- 顧客は店舗のLINE公式アカウントから「予約」ボタンを押し、メニュー・日時を選ぶだけで予約完了。  
+- 管理者は管理画面で「本日の予約一覧」「顧客メモ」を確認しながら対応可能。  
+- LINE通知により予約の確認・キャンセルもスムーズに行える。  
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## ユーザーの獲得について
+- 店舗オーナーに直接営業して導入してもらう（初期は知り合いの床屋からスタート）。  
+- 導入後はLINE公式アカウントを通じて顧客が自然に利用開始できる。  
+- 将来的には複数店舗で導入し、小規模サロン等の負を解消予定。 
 
-## Learning Laravel
+## サービスの差別化ポイント・推しポイント
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **大手サービス（ホットペッパーなど）との違い**  
+  - 導入コストが安い（月額固定＋LINE連携のみ）。  
+    （個人開発＋飛び込み営業のため無駄なコストがかからない）  
+  - 余計なクーポンや広告表示などの機能がなく、**予約に集中できるUI**。  
+  - 多くのサービスは「リスト形式」や「表形式」で予約一覧を表示し直感性に欠けるが、  
+    このアプリでは **「カレンダーに直接×や◎を設定」「クリックして予約を追加・変更」** が可能。  
+    → 電話対応の感覚に近く、現場スタッフでも迷わず使える。  
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- **独自の強み**  
+  - **LINEミニアプリでシームレスに利用可能**  
+    （顧客はアプリ追加不要、店舗は既存のLINE公式アカウントに埋め込むだけで導入可能）。  
+  - **LINEリッチメニューから予約確認が可能**  
+    さらに、チャットで店長とやりとりできる機能を備える。  
+    → 他サービスでは「予約管理」止まりでチャット連携まではできないケースが多い。  
+    あくまで **常連客の維持と予約管理の効率化** を目的とするからこそ実現できる特徴。  
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 価格について
 
-## Laravel Sponsors
+- **本サービスは 有料提供を前提としています。**
+- 初期導入費：無料（セットアップはサポート）
+- 月額料金：小規模店舗が負担できる範囲（例：5,000〜10,000円程度）
+- LINE公式アカウントの利用料（月額〜5,000円程度）は店舗負担
+  大手サービスに比べ、広告費や送客手数料が不要なため、総コストは大幅に低く抑えられます(競合他社は最安値でも月額1万円以上)。
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **有料化の導入時期**
+- 2026年冬ごろを予定しております。
+- 10月中にお試しとして無料でリリース→行きつけの床屋さんに使用感のフィードバックをもらう。
+- 現場の声を元にさらに必要とされる機能があれば適宜アップデートしていく。
+- 卒業期日が10月17日までなので取り急ぎレビューをお願いしている次第です。
 
-### Premium Partners
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development/)**
-- **[Active Logic](https://activelogic.com)**
+## 機能候補
+- **MVPリリース時**
+  - 顧客用：メニュー選択 → 日時選択 → 予約完了フロー  
+  - 管理者用：予約一覧表示、予約の手動追加  
+  - LINE通知（予約完了・キャンセル通知）  
+- **本リリースまで**
+  - カレンダー記号（×・tel・◎など）の設定機能  
+  - 顧客メモ＋画像添付機能  
+  - LINEリッチメニュー連携  
+  - 店舗別の独自URL（public_token）での予約受付  
+  - 予約ステータス変更、ドラッグ＆ドロップでの管理UI  
 
-## Contributing
+## 使用する技術スタック
+- **フレームワーク**: Laravel 10（Bladeテンプレートを使用）  
+- **データベース**: MySQL（Docker環境で構築）  
+- **デプロイ先**: AWS Lightsail（Docker構成）、S3（画像アップロード）、Lambda（LINE通知処理）  
+- **外部連携**: LINE Messaging API, LINEミニアプリ  
+- **ライブラリ/パッケージ**:  
+  - `linecorp/line-bot-sdk` (LINE通知処理)  
+  - `laravel/breeze` (管理者ログイン認証)  
+  - `alpine.js` (モーダル・UI改善)  
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 技術選定理由（Laravel採用理由）
+- **現職での利用実績**  
+  現職(入学後すぐに採用)でもLaravelを使用しており、実務経験を活かして効率的に開発できるため。  
+- **Rails知識の横展開**  
+  Railsと同じMVCアーキテクチャを持ち、学習した知識を活かしやすく、開発スピードを高められるため。  
+- **AWSとの親和性**  
+  LightsailやLambdaなどのAWSサービスと組み合わせやすく、運用・拡張性を確保できるため。  
 
-## Code of Conduct
+これらにより、**学習効果・開発効率・運用性のバランスを取れるフレームワーク**としてLaravelを選定しました。
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-## Security Vulnerabilities
+<!-- ### 画面遷移図
+Figma：https://xxxxxxxxxxxx
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### READMEに記載した機能
+- [x] 予約機能（メニュー選択 → 日時選択 → 確認 → 完了フロー）  
+- [x] 予約完了画面表示  
+- [x] 予約キャンセル機能（LINE通知からキャンセル可能）  
+- [x] 予約変更機能（確認画面・管理画面から）  
+- [x] カレンダー表示機能（×・tel・◎などの記号を反映）  
+- [x] カレンダー手動操作機能（管理者による記号設定、ドラッグ&ドロップで変更）  
+- [x] 管理者用予約一覧表示機能（本日／翌日以降）  
+- [x] 管理者による予約の手動追加  
+- [x] 顧客メモ機能（テキスト・画像添付・履歴表示）  
+- [x] 顧客検索機能（電話帳風セレクトボックスから選択）  
+- [x] LINE通知機能（予約完了／キャンセル時に顧客・管理者へ通知）  
+- [x] LINEリッチメニュー連携（予約確認・予約フォーム・電話発信・メニュー閉じる）  
+- [x] 店舗別予約URL（public_tokenによる識別）  
+- [x] 管理者ログイン機能（Laravel Breeze, guard: admin）  
+- [x] パスワード初期発行・変更機能（初回ログイン時変更必須）  
+- [x] 店舗情報管理機能（営業時間・定休日・休憩時間設定）  
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 未ログインでも利用できる画面
+
+- [x] line予約フォーム（メニュー選択 → 日時選択 → 確認 → 完了）  
+- [x] line予約内容確認画面  
+- [x] line予約キャンセル画面（LINE通知経由でアクセス可能）  
+
+---
+
+### メールアドレス・パスワード変更確認項目
+
+- [x] パスワード → 初回ログイン時に専用画面で変更できる（直接変更不可）  
+- [x] メールアドレス → 管理者が登録時に設定、変更は専用フォームを経由   -->
