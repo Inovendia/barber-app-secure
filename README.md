@@ -94,6 +94,7 @@ LINEミニアプリから簡単に予約ができる床屋向けの予約管理�
 これらにより、**学習効果・開発効率・運用性のバランスを取れるフレームワーク**としてLaravelを選定しました。
 
 
+
 ### 画面遷移図
 Figma：https://www.figma.com/design/2Aa8mRLRi5RZCEth684yQB/rezamie?t=S5One5Fst5yP9iJT-1
 
