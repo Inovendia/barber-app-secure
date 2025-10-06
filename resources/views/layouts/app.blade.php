@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', config('app.name', 'Laravel'))</title>
+    <title>{{ config('app.name', 'Laravel') }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://unpkg.com/alpinejs@3.13.5/dist/cdn.min.js" defer></script>
@@ -27,9 +27,9 @@
             </header>
         @endisset
 
-        <!-- ✅ ここを修正 -->
+        <!-- ✅ Breeze系レイアウトでは $slot を使う -->
         <main>
-            @yield('content')
+            {{ $slot }}
         </main>
     </div>
 </body>
