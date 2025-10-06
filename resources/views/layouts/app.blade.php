@@ -1,3 +1,4 @@
+<!-- resources/views/layouts/app.blade.php -->
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -5,23 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>@yield('title', config('app.name', 'Laravel'))</title>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-    <!-- ✅ Styles & Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    <!-- ✅ 必要ならAlpine.js（任意） -->
     <script src="https://unpkg.com/alpinejs@3.13.5/dist/cdn.min.js" defer></script>
 </head>
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-gray-100">
-        @include('layouts.navigation')
 
-        <!-- Page Heading -->
+        {{-- トップページではナビを表示しない --}}
+        @if (!request()->is('/'))
+            @include('layouts.navigation')
+        @endif
+
         @isset($header)
             <header class="bg-white shadow">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -30,9 +27,9 @@
             </header>
         @endisset
 
-        <!-- Page Content -->
+        <!-- ✅ ここを修正 -->
         <main>
-            {{ $slot }}
+            @yield('content')
         </main>
     </div>
 </body>
