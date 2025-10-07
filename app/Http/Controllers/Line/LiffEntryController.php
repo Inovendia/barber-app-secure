@@ -29,7 +29,18 @@ class LiffEntryController extends Controller
         }
 
         if (!$shop) {
-            $shop = \App\Models\Shop::where('is_default', true)->first() ?? \App\Models\Shop::first();
+            $defaultShopId = config('liff.default_shop_id');
+            if ($defaultShopId) {
+                $shop = \App\Models\Shop::find($defaultShopId);
+                \Log::info('🎯 Default shop (from config) selected', [
+                    'shop_id' => $defaultShopId,
+                    'shop'    => $shop?->name,
+                ]);
+            }
+        }
+
+        if (!$shop) {
+            $shop = \App\Models\Shop::first();
             \Log::info('🪶 Fallback shop selected', ['shop' => $shop?->name]);
         }
 
