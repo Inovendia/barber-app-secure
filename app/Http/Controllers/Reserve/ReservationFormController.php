@@ -359,4 +359,25 @@ class ReservationFormController extends Controller
             'line_user_id' => $lineUserId,
         ]);
     }
+
+    public function showForm(string $token)
+    {
+        \Log::info('🌀 [ReservationFormController] showForm accessed', [
+            'token' => $token,
+            'url' => request()->fullUrl(),
+        ]);
+
+        if ($token === config('liff.entry_token')) {
+            \Log::info('🚀 [Trampoline] LIFF entry page returned');
+            return view('liff.entry');
+        }
+
+        $shop = \App\Models\Shop::where('public_token', $token)->first();
+        \Log::info('✅ [Shop resolved]', [
+            'shop_id' => $shop->id ?? null,
+            'shop_name' => $shop->name ?? 'not found',
+        ]);
+
+        return view('reserve.form', compact('shop'));
+    }
 }
