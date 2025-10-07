@@ -14,6 +14,8 @@ use App\Http\Controllers\Admin\AdminChangePasswordController;
 use App\Http\Controllers\Admin\AdminController;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Line\LiffEntryController;
+
 
 // ユーザー用
 Route::get('/', fn() => view('welcome'));
@@ -25,6 +27,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// LIFFを通さず直接検証できるデバッグURL
+Route::get('/liff/debug', fn() => view('liff.debug'))->name('liff.debug');
 
 //top用
 Route::get('/', function () {
@@ -38,31 +42,41 @@ Route::view('/support', 'support')->name('support');
 
 require __DIR__.'/auth.php';
 
-// LINEミニアプリ予約関連（店舗別予約URL対応）
-Route::prefix('reserve/{token}')->name('reserve.')->group(function () {
-    Route::get('/form', [ReservationFormController::class, 'create'])->name('form');
-    Route::post('/calendar', [ReservationFormController::class, 'calender'])->name('calender');
-    Route::post('/confirmation', [ReservationFormController::class, 'showConfirmation'])->name('confirmation');
-    Route::post('/complete', [ReservationFormController::class, 'store'])->name('store');
-    Route::post('/resolve', [ReservationFormController::class, 'resolve'])->name('resolve');
-    Route::get('/confirm', [ReservationFormController::class, 'confirm'])->name('confirm');
+Route::get('/login', function () {
+    return redirect('/admin/login');
 });
 
-// 共通処理（予約確認・キャンセルなど）
-Route::get('/reserve/verify', [ReservationFormController::class, 'verify'])->name('reserve.verify');
-Route::post('/reserve/cancel', [ReservationFormController::class, 'cancel'])->name('reserve.cancel');
-Route::get('/reserve/form-entry', [ReservationFormController::class, 'entry'])->name('reserve.entry');
 
-// テストビュー（任意）
+// --------------------------
+// ① LINEミニアプリ → Laravel中継（shop_id → public_token 解決）
+// --------------------------
+Route::post('/liff/entry', [LiffEntryController::class, 'entry'])->name('liff.entry');
+
+// --------------------------
+// ② 店舗別予約URL（public_token対応）
+// https://rezamie.com/reserve/{token}/form
+// --------------------------
+Route::prefix('reserve/{token}')->name('reserve.')->group(function () {
+    Route::get('/form', [ReservationFormController::class, 'create'])->name('form'); // 予約フォーム表示
+    Route::post('/calendar', [ReservationFormController::class, 'calender'])->name('calender'); // カレンダー取得
+    Route::post('/confirmation', [ReservationFormController::class, 'showConfirmation'])->name('confirmation'); // 確認画面
+    Route::post('/complete', [ReservationFormController::class, 'store'])->name('store'); // 登録処理
+    Route::get('/confirm', [ReservationFormController::class, 'confirm'])->name('confirm'); // 予約内容確認
+});
+
+// --------------------------
+// ③ 共通処理（店舗非依存）
+// --------------------------
+Route::get('/reserve/verify', [ReservationFormController::class, 'verify'])->name('reserve.verify'); // 予約確認リンク
+Route::post('/reserve/cancel', [ReservationFormController::class, 'cancel'])->name('reserve.cancel'); // キャンセル
+Route::get('/reserve/form-entry', [ReservationFormController::class, 'entry'])->name('reserve.entry'); // エントリーテスト or 中継確認用
+Route::get('/reserve/my', [ReservationFormController::class, 'my'])->name('reserve.my'); // ログインユーザー確認
+
+// --------------------------
+// テスト・Webhook関連
+// --------------------------
 Route::get('/test-calender', fn() => view('reserve.calender'));
-
-// LINE Webhook
 Route::post('/webhook', [LineWebhookController::class, 'handle']);
-
-// token認証用
-Route::get('/reserve/my', [ReservationFormController::class, 'my'])->name('reserve.my');
-//Route::post('/reserve/resolve', [ReservationFormController::class, 'resolve'])->name('reserve.resolve');
-
 
 // ------------------------
 // 管理者認証不要エリア
