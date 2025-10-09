@@ -11,11 +11,9 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-
-            <!-- 管理者への挨拶 -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    ようこそ、管理者さん！これは admin 専用のダッシュボードです。
+                    これは管理者専用のダッシュボードです。予約の管理ができます。
                 </div>
             </div>
 
@@ -27,20 +25,18 @@
                 <a href="{{ route('admin.reservations.create') }}" class="btn-reserve mr-2 mb-2">
                     ＋予約を追加
                 </a>
-                <a href="{{ route('admin.customers.create') }}" class="btn-reserve mr-2 mb-2">
+                <!-- <a href="{{ route('admin.customers.create') }}" class="btn-reserve mr-2 mb-2">
                     ＋ 新規顧客を登録
-                </a>
+                </a> -->
                 <a href="{{ route('admin.reservations.calender', ['symbol_mode' => 1]) }}" class="btn-reserve mb-2">
                     ＋ カレンダー記号設定
                 </a>
             </div>
-
-            <!-- 本日の予約一覧 -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <h3 class="text-lg font-semibold mb-4">📅 本日の予約一覧</h3>
                     <div class="overflow-x-auto">
-                        <table class="table-auto w-full text-sm">
+                        <table class="table-auto w-full text-sm bg-white">
                             <thead class="bg-gray-100">
                                 <tr>
                                     <th class="px-4 py-2 text-left whitespace-nowrap">名前</th>
@@ -61,23 +57,21 @@
                             <tbody>
                                 @forelse ($reservations as $reservation)
                                     <tr class="border-t">
-                                        <td class="px-4 py-2 text-left whitespace-nowrap">{{ $reservation->user->name ?? '未登録' }}</td>
-                                        <td class="px-4 py-2 text-left whitespace-nowrap">{{ $categoryLabels[$reservation->category] ?? '未設定' }}</td>
-                                        <td class="px-4 py-2 text-left whitespace-nowrap">{{ $reservation->menu }}</td>
-                                        <td class="px-4 py-2 text-left whitespace-nowrap">{{ $reservation->reserved_at->format('H:i') }}</td>
-                                        <td class="px-4 py-2 text-left whitespace-nowrap">
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $reservation->user->name ?? '未登録' }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $categoryLabels[$reservation->category] ?? '未設定' }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $reservation->menu }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $reservation->reserved_at->format('H:i') }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">
                                             @if (!empty($reservation->note))
-                                                <div class="text-sm text-gray-600 mb-1">
-                                                    {{ $reservation->note }}
-                                                </div>
+                                                <div class="text-sm text-gray-600 mb-1">{{ $reservation->note }}</div>
                                             @endif
                                         </td>
-                                        <td class="px-4 py-2">
+                                        <td class="px-4 py-2 whitespace-nowrap">
                                             <form method="POST" action="{{ route('admin.reservations.updateStatus', $reservation->id) }}">
                                                 @csrf
                                                 @method('PATCH')
                                                 <select name="status" onchange="this.form.submit()" class="border rounded px-2 py-1">
-                                                    <option value="pending" {{ $reservation->status === 'pending' ? 'selected' : '' }}>保留</option>
+                                                    <!-- <option value="pending" {{ $reservation->status === 'pending' ? 'selected' : '' }}>保留</option> -->
                                                     <option value="confirmed" {{ $reservation->status === 'confirmed' ? 'selected' : '' }}>確定</option>
                                                     <option value="canceled" {{ $reservation->status === 'canceled' ? 'selected' : '' }}>キャンセル</option>
                                                 </select>
@@ -86,7 +80,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-4 py-2 text-center text-gray-500">
+                                        <td colspan="6" class="px-4 py-2 text-center text-gray-500 whitespace-nowrap">
                                             本日の予約はありません。
                                         </td>
                                     </tr>
@@ -96,13 +90,11 @@
                     </div>
                 </div>
             </div>
-
-            <!-- 明日以降の予約一覧 -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-8">
                 <div class="p-6">
                     <h3 class="text-lg font-semibold mb-4">📆 明日以降の予約一覧</h3>
                     <div class="overflow-x-auto">
-                        <table class="table-auto w-full bg-white">
+                        <table class="table-auto w-full text-sm bg-white">
                             <thead class="bg-gray-100">
                                 <tr>
                                     <th class="px-4 py-2 text-left whitespace-nowrap">名前</th>
@@ -116,21 +108,21 @@
                             <tbody>
                                 @forelse ($upcomingReservations as $reservation)
                                     <tr class="border-t">
-                                        <td class="px-4 py-2 text-left whitespace-nowrap">{{ $reservation->user->name ?? '未登録' }}</td>
-                                        <td class="px-4 py-2 text-left whitespace-nowrap">{{ $reservation->category ?? '未設定' }}</td>
-                                        <td class="px-4 py-2 text-left whitespace-nowrap">{{ $reservation->menu }}</td>
-                                        <td class="px-4 py-2 text-left whitespace-nowrap">{{ $reservation->reserved_at->format('n/j H:i') }}</td>
-                                        <td class="px-4 py-2 text-left whitespace-nowrap">
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $reservation->user->name ?? '未登録' }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $categoryLabels[$reservation->category] ?? '未設定' }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $reservation->menu }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $reservation->reserved_at->format('n/j H:i') }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">
                                             @if (!empty($reservation->note))
                                                 <div class="text-sm text-gray-600 mb-1">{{ $reservation->note }}</div>
                                             @endif
                                         </td>
-                                        <td class="px-4 py-2">
+                                        <td class="px-4 py-2 whitespace-nowrap">
                                             <form method="POST" action="{{ route('admin.reservations.updateStatus', $reservation->id) }}">
                                                 @csrf
                                                 @method('PATCH')
                                                 <select name="status" onchange="this.form.submit()" class="border rounded px-2 py-1">
-                                                    <option value="pending" {{ $reservation->status === 'pending' ? 'selected' : '' }}>保留</option>
+                                                    <!-- <option value="pending" {{ $reservation->status === 'pending' ? 'selected' : '' }}>保留</option> -->
                                                     <option value="confirmed" {{ $reservation->status === 'confirmed' ? 'selected' : '' }}>確定</option>
                                                     <option value="canceled" {{ $reservation->status === 'canceled' ? 'selected' : '' }}>キャンセル</option>
                                                 </select>
@@ -139,7 +131,9 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-4 py-2 text-center text-gray-500">明日以降の予約はありません。</td>
+                                        <td colspan="6" class="px-4 py-2 text-center text-gray-500 whitespace-nowrap">
+                                            明日以降の予約はありません。
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -147,6 +141,7 @@
                     </div>
                 </div>
             </div>
+
 
 
 <!-- (スタンプ履歴)必要に応じてコメントアウト解除
@@ -184,7 +179,7 @@
                 </div>
             </div>
 -->
-
+@if(false)
             <!-- 顧客セレクト検索フォーム -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">
@@ -372,6 +367,7 @@
                 </div>
             </div>
 
+@endif
 
 <!-- 顧客メモ追加フォーム
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
