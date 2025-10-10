@@ -93,7 +93,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 //    return response()->json(['status' => 'ok']);
 //});
 
-
+Route::middleware(['auth:admin'])->group(function () {
+    Route::get('/admin/reservations/json', [ReservationController::class, 'json'])
+        ->name('admin.reservations.json');
+});
 
 // ------------------------
 // 管理者ログイン後のみアクセス可能

@@ -403,6 +403,94 @@
                     </form>
                 </div>
             </div>         -->
+
+            <div class="mt-10">
+                <h2 class="text-lg font-semibold mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pink-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M6 2a1 1 0 000 2h8a1 1 0 100-2H6zM3 6a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2H3zm2 3h10a1 1 0 110 2H5a1 1 0 010-2z" />
+                    </svg>
+                    予約状況カレンダー
+                </h2>
+
+                <div id="calendar"></div>
+            </div>
+
         </div>
     </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar');
+    if (!calendarEl) return;
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'ja',
+        height: 'auto',
+        firstDay: 1,
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: ''
+        },
+        events: '/admin/reservations/json',
+
+        // ✅ ピンクを淡く（彩度を落とす）
+        eventColor: '#f9a8d4', // ← 薄いピンク（Tailwindの pink-300 に近い）
+        eventTextColor: '#000', // 文字は黒でコントラストを確保
+
+        // ✅ イベントの表示まわり
+        dayMaxEventRows: true,
+        moreLinkClick: 'popover',
+        eventDisplay: 'block',
+
+        eventDidMount: function(info) {
+            // 折り返し許可＋内側余白で見やすく
+            info.el.style.whiteSpace = 'normal';
+            info.el.style.lineHeight = '1.3';
+            info.el.style.padding = '4px 6px';
+            info.el.style.borderRadius = '6px';
+            info.el.style.overflow = 'visible';
+            info.el.style.textOverflow = 'unset';
+            info.el.style.fontSize = '0.85rem';
+        },
+
+        // ✅ 時間表記を明示的に2桁＋コロン付きにして見切れ防止
+        eventTimeFormat: {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        },
+    });
+
+    calendar.render();
+});
+</script>
+@endpush
+
+<style>
+/* FullCalendar イベント見切れ対策 */
+.fc .fc-daygrid-event {
+  white-space: normal !important;
+  line-height: 1.4 !important;
+  padding: 4px 6px !important;
+  border-radius: 6px !important;
+  overflow: visible !important;   /* ← 高さ制限を解除 */
+}
+
+.fc .fc-event-title,
+.fc .fc-event-time {
+  overflow: visible !important;   /* ← 時間や文字の切れを防止 */
+  text-overflow: unset !important;
+  white-space: normal !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+</style>
+
+
+
 </x-app-layout>
+
