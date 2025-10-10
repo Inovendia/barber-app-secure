@@ -10,13 +10,13 @@
             <div>
                 <label class="block text-sm mb-1">氏名</label>
                 <input type="text" name="name" required
-                    class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-400 focus:border-blue-400" />
+                    class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-400 focus:border-blue-400" placeholder="名前と名字の間はスペースを入れてください"/>
             </div>
 
             <div>
                 <label class="block text-sm mb-1">電話番号</label>
                 <input type="text" name="phone" required
-                    class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-400 focus:border-blue-400" />
+                    class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-400 focus:border-blue-400" placeholder="ハイフン不要です"/>
             </div>
 
             <div>

@@ -188,4 +188,31 @@ class ReservationController extends Controller
         return redirect()->route('admin.dashboard')
             ->with('status', '予約をキャンセルしました');
     }
+
+    public function json()
+    {
+        $admin = Auth::guard('admin')->user();
+        $shopId = $admin->shop_id;
+
+        // 🔽 確定済み予約のみ取得
+        $reservations = \App\Models\Reservation::where('reservations.shop_id', $shopId)
+            ->where('reservations.status', 'confirmed')
+            ->join('users', 'reservations.user_id', '=', 'users.id')
+            ->select(
+                'reservations.id',
+                'users.name as user_name',
+                'reservations.menu',
+                'reservations.reserved_at'
+            )
+            ->get();
+
+        $events = $reservations->map(fn($r) => [
+            'id' => $r->id,
+            'title' => $r->user_name . '（' . $r->menu . '）',
+            'start' => $r->reserved_at,
+        ]);
+
+        return response()->json($events);
+    }
+
 }
