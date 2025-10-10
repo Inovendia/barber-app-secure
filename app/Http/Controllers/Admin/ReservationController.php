@@ -168,7 +168,7 @@ class ReservationController extends Controller
                 'category' => $data['category'],
                 'menu' => $data['menu'],
                 'reserved_at' => $data['reserved_at'],
-                'status' => 'pending',
+                'status' => 'confirmed',
                 'note' => $data['note'] ?? null,
             ]);
         });
