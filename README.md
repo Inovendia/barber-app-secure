@@ -118,7 +118,7 @@ Laravel 側で自動的にユーザー登録・認証を行います。
 LINE_CHANNEL_ACCESS_TOKEN=xxxxx
 LINE_CHANNEL_SECRET=xxxxx
 LIFF_ID=xxxxx
-
+```
 
 
 
