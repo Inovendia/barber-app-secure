@@ -93,6 +93,33 @@ LINEミニアプリから簡単に予約ができる床屋向けの予約管理�
 
 これらにより、**学習効果・開発効率・運用性のバランスを取れるフレームワーク**としてLaravelを選定しました。
 
+## LINE認証フロー（LIFFログイン）
+
+### 概要
+本アプリでは、ユーザーが LINE ミニアプリ（LIFF）経由で予約フォームへアクセスすると、  
+LIFF SDK により LINE アカウント情報（userId, displayName）を取得し、  
+Laravel 側で自動的にユーザー登録・認証を行います。
+
+---
+
+### フロー概要
+1. ユーザーがリッチメニューから  
+   `https://rezamie.jp/reserve/{public_token}/form` にアクセス  
+2. LIFF SDK によりログイン認証を実行  
+3. LINEプロフィール情報（userId, displayName）を取得  
+4. Laravel 側で該当ショップを `public_token` から特定  
+5. ユーザー情報を登録または更新（`users` テーブル）  
+6. 認証済みユーザーとして予約フォームを表示し、以降の予約処理で `line_user_id` を使用
+
+---
+
+### 環境変数設定（.env）
+```env
+LINE_CHANNEL_ACCESS_TOKEN=xxxxx
+LINE_CHANNEL_SECRET=xxxxx
+LIFF_ID=xxxxx
+```
+
 
 
 ### 画面遷移図
