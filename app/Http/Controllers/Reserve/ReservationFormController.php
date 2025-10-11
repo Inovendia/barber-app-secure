@@ -156,7 +156,7 @@ class ReservationFormController extends Controller
         }
 
         $menuDurations = [
-            '一般 4500円' => 60,
+            '一般 4600円' => 60,
             'カットのみ 3500円' => 60,
             '高校生 3600円' => 60,
             '中学生 3100円' => 60,
@@ -245,7 +245,7 @@ class ReservationFormController extends Controller
         }
 
         $menuDurations = [
-            '一般 4500円' => 60,
+            '一般 4600円' => 60,
             'カットのみ 3500円' => 60,
             '高校生 3600円' => 60,
             '中学生 3100円' => 60,
