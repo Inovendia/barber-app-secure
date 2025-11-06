@@ -58,7 +58,7 @@ Route::post('/liff/entry', [LiffEntryController::class, 'entry'])->name('liff.en
 // --------------------------
 Route::prefix('reserve/{token}')->name('reserve.')->group(function () {
     Route::get('/form', [ReservationFormController::class, 'create'])->name('form'); // 予約フォーム表示
-    Route::post('/calendar', [ReservationFormController::class, 'calender'])->name('calender'); // カレンダー取得
+    Route::get('/calendar', [ReservationFormController::class, 'calender'])->name('calender'); // カレンダー取得
     Route::post('/confirmation', [ReservationFormController::class, 'showConfirmation'])->name('confirmation'); // 確認画面
     Route::post('/complete', [ReservationFormController::class, 'store'])->name('store'); // 登録処理
     Route::get('/confirm', [ReservationFormController::class, 'confirm'])->name('confirm'); // 予約内容確認
