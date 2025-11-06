@@ -141,10 +141,9 @@ class ReservationFormController extends Controller
 
 
     public function calender(Request $request, $token)
-    { {
-            if (!$request->filled(['line_user_id', 'name', 'phone', 'category', 'menu'])) {
-                return redirect()->route('reserve.form')->with('status', '必要な情報が不足しています。');
-            }
+    {
+        if (!$request->filled(['line_user_id', 'name', 'phone', 'category', 'menu'])) {
+            return redirect()->route('reserve.form')->with('status', '必要な情報が不足しています。');
         }
 
         $startOffset = (int) $request->query('start_offset', 0);

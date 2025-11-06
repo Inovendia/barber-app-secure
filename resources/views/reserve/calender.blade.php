@@ -29,7 +29,7 @@
             <div class="mb-4 px-2 sm:px-0">
                 <div class="flex items-center justify-between">
                     <!-- 左：前へ -->
-                    <a href="{{ route('reserve.calender', ['token' => $token] + $prevParams) }}"
+                    <a href="{{ route('reserve.calender', ['token' => $token]) }}?{{ http_build_query(array_merge(request()->all(), ['start_offset' => max($startOffset - 14, 0)])) }}"
                         class="bg-blue-100 text-blue-700 px-3 py-1 rounded font-medium inline-flex items-center hover:bg-blue-200 active:bg-blue-300 whitespace-nowrap">
                         <span class="mr-1 text-lg">◀</span> 前へ
                     </a>
@@ -40,7 +40,7 @@
                     </div>
 
                     <!-- 右：次へ -->
-                    <a href="{{ route('reserve.calender', ['token' => $token] + $nextParams) }}"
+                    <a href="{{ route('reserve.calender', ['token' => $token]) }}?{{ http_build_query(array_merge(request()->all(), ['start_offset' => $startOffset + 14])) }}"
                         class="bg-blue-100 text-blue-700 px-3 py-1 rounded font-medium inline-flex items-center hover:bg-blue-200 active:bg-blue-300 whitespace-nowrap">
                         次へ <span class="ml-1 text-lg">▶</span>
                     </a>
