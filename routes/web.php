@@ -85,6 +85,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AdminAuthController::class, 'login']);
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+    Route::get('/password/forgot',
+        [\App\Http\Controllers\Admin\AdminPasswordResetNoEmailController::class, 'showEmailForm']
+    )->name('password.forgot');
+
+    Route::post('/password/forgot',
+        [\App\Http\Controllers\Admin\AdminPasswordResetNoEmailController::class, 'checkEmail']
+    )->name('password.check');
+
+    Route::get('/password/reset',
+        [\App\Http\Controllers\Admin\AdminPasswordResetNoEmailController::class, 'showResetForm']
+    )->name('password.reset.form');
+
+    Route::post('/password/reset',
+        [\App\Http\Controllers\Admin\AdminPasswordResetNoEmailController::class, 'reset']
+    )->name('password.reset');
 });
 
 //line userID取得
