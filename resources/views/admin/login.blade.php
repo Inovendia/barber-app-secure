@@ -33,8 +33,8 @@
             <!-- Links and button -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 @if (Route::has('password.request'))
-                    <a class="text-sm text-blue-600 hover:underline" href="{{ route('password.request') }}">
-                        {{ __('Forgot your password?') }}
+                    <a class="text-sm text-blue-600 hover:underline" href="{{ route('admin.password.forgot') }}">
+                        パスワードを忘れた方はこちら
                     </a>
                 @endif
 
