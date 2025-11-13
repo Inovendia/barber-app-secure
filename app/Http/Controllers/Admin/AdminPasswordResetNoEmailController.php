@@ -71,7 +71,7 @@ class AdminPasswordResetNoEmailController extends Controller
         }
 
         $admin = Admin::where('email', $email)->firstOrFail();
-        $admin->password = bcrypt($request->password);
+        $admin->password = $request->password;
         $admin->is_password_changed = true;
         $admin->save();
 
