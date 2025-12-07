@@ -20,6 +20,8 @@ class Reservation extends Model
         'note',
         'line_token',
         'line_user_id',
+        'duration',
+        'is_extended',
     ];
 
     protected $casts = [

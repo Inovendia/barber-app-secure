@@ -52,6 +52,39 @@ class ReservationFormController extends Controller
             ['name' => $validated['name'], 'phone' => $validated['phone']]
         );
 
+        // メニューごとの基本施術時間
+        $menuDurations = [
+            '一般 4600円' => 60,
+            'カットのみ 3500円' => 60,
+            '高校生 3600円' => 60,
+            '中学生 3100円' => 60,
+            '小学生 2700円' => 60,
+            'ノーマル 9500円〜' => 180,
+            'ピンパーマ 13500円〜' => 180,
+            'スパイラル 13500円〜' => 180,
+            'ブリーチ 5500円〜（2回目以降から+4500円ずつ）' => 150,
+            'ノーマルカラー 5000円〜' => 150,
+            'グレイカラー 2300円〜' => 150,
+        ];
+
+        $baseDuration = $menuDurations[$validated['menu']] ?? 60;
+        $reservedAt = Carbon::parse($validated['reserved_at']);
+
+        // 連続予約チェック: 直前の予約を検索
+        $previousReservation = Reservation::where('shop_id', $shop->id)
+            ->where('status', 'confirmed')
+            ->whereDate('reserved_at', $reservedAt->toDateString())
+            ->get()
+            ->first(function ($res) use ($reservedAt, $menuDurations) {
+                $resDuration = $res->duration ?? ($menuDurations[$res->menu] ?? 60);
+                $resEnd = Carbon::parse($res->reserved_at)->addMinutes($resDuration);
+                return $resEnd->equalTo($reservedAt);
+            });
+
+        // 直前の予約が存在 & 延長されていない場合のみ+30分
+        $shouldExtend = $previousReservation && !$previousReservation->is_extended;
+        $finalDuration = $shouldExtend ? $baseDuration + 30 : $baseDuration;
+
         // 予約を作成（line_tokenを生成）
         $reservation = Reservation::create([
             'user_id' => $user->id,
@@ -62,6 +95,8 @@ class ReservationFormController extends Controller
             'status' => 'confirmed',
             'line_token' => Str::random(40),
             'line_user_id' => $validated['line_user_id'],
+            'duration' => $finalDuration,
+            'is_extended' => $shouldExtend,
         ]);
 
         // LINE通知内容の作成
