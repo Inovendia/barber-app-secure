@@ -104,7 +104,17 @@
                                             $slotDateTime = $date->copy()->setTimeFromTimeString($start->format('H:i'))->format('Y-m-d H:i');
                                             $mark = $calenderMarks[$slotDateTime][0]->symbol ?? null;
 
-                                            $isReserved = isset($reservedSlots[$slotDateTime]);
+                                            // 新規予約の施術時間内に既存予約があるかチェック
+                                            $isReserved = false;
+                                            $intervals = ceil($duration / 30);
+                                            for ($j = 0; $j < $intervals; $j++) {
+                                                $checkSlot = $start->copy()->addMinutes(30 * $j)->format('Y-m-d H:i');
+                                                if (isset($reservedSlots[$checkSlot])) {
+                                                    $isReserved = true;
+                                                    break;
+                                                }
+                                            }
+                                            
                                             $isOutOfBusiness = $beforeOpening || $afterClosing || $isLunchTime;
 
                                             $normalizedMark = $mark ? trim(mb_convert_kana($mark, 'as')) : null;
