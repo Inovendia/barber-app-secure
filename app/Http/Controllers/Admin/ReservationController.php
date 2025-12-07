@@ -237,15 +237,45 @@ class ReservationController extends Controller
                 'reservations.id',
                 'users.name as user_name',
                 'reservations.menu',
-                'reservations.reserved_at'
+                'reservations.reserved_at',
+                'reservations.is_extended',
+                'reservations.duration'
             )
             ->get();
 
-        $events = $reservations->map(fn($r) => [
-            'id' => $r->id,
-            'title' => $r->user_name . '（' . $r->menu . '）',
-            'start' => $r->reserved_at,
-        ]);
+        $events = [];
+        
+        foreach ($reservations as $r) {
+            // 基本の予約ボックス（60分）
+            $events[] = [
+                'id' => $r->id,
+                'title' => '',
+                'start' => $r->reserved_at,
+                'end' => \Carbon\Carbon::parse($r->reserved_at)->addMinutes(60),
+                'extendedProps' => [
+                    'name' => $r->user_name,
+                    'menu' => $r->menu,
+                    'isExtended' => false,
+                    'isBreak' => false,
+                ],
+            ];
+            
+            // 延長された場合、+30分の休憩ボックスを追加
+            if ($r->is_extended) {
+                $events[] = [
+                    'id' => $r->id . '_break',
+                    'title' => '',
+                    'start' => \Carbon\Carbon::parse($r->reserved_at)->addMinutes(60),
+                    'end' => \Carbon\Carbon::parse($r->reserved_at)->addMinutes(90),
+                    'extendedProps' => [
+                        'name' => $r->user_name,
+                        'menu' => '',
+                        'isExtended' => false,
+                        'isBreak' => true,
+                    ],
+                ];
+            }
+        }
 
         return response()->json($events);
     }
