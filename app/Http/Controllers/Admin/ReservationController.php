@@ -161,7 +161,40 @@ class ReservationController extends Controller
             ]
         );
 
-        DB::transaction(function () use ($user, $data, $admin) {
+        // メニューごとの基本施術時間
+        $menuDurations = [
+            '一般 4600円' => 60,
+            'カットのみ 3500円' => 60,
+            '高校生 3600円' => 60,
+            '中学生 3100円' => 60,
+            '小学生 2700円' => 60,
+            'ノーマル 9500円〜' => 180,
+            'ピンパーマ 13500円〜' => 180,
+            'スパイラル 13500円〜' => 180,
+            'ブリーチ 5500円〜（2回目以降から+4500円ずつ）' => 150,
+            'ノーマルカラー 5000円〜' => 150,
+            'グレイカラー 2300円〜' => 150,
+        ];
+
+        $baseDuration = $menuDurations[$data['menu']] ?? 60;
+        $reservedAt = Carbon::parse($data['reserved_at']);
+
+        // 連続予約チェック: 直前の予約を検索
+        $previousReservation = Reservation::where('shop_id', $admin->shop_id)
+            ->where('status', 'confirmed')
+            ->whereDate('reserved_at', $reservedAt->toDateString())
+            ->get()
+            ->first(function ($res) use ($reservedAt, $menuDurations) {
+                $resDuration = $res->duration ?? ($menuDurations[$res->menu] ?? 60);
+                $resEnd = Carbon::parse($res->reserved_at)->addMinutes($resDuration);
+                return $resEnd->equalTo($reservedAt);
+            });
+
+        // 直前の予約が存在 & 延長されていない場合のみ+30分
+        $shouldExtend = $previousReservation && !$previousReservation->is_extended;
+        $finalDuration = $shouldExtend ? $baseDuration + 30 : $baseDuration;
+
+        DB::transaction(function () use ($user, $data, $admin, $finalDuration, $shouldExtend) {
             Reservation::create([
                 'user_id' => $user->id,
                 'shop_id' => $admin->shop_id,
@@ -170,6 +203,8 @@ class ReservationController extends Controller
                 'reserved_at' => $data['reserved_at'],
                 'status' => 'confirmed',
                 'note' => $data['note'] ?? null,
+                'duration' => $finalDuration,
+                'is_extended' => $shouldExtend,
             ]);
         });
 

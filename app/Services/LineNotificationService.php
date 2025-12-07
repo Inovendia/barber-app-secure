@@ -25,6 +25,17 @@ class LineNotificationService
      */
     public function notifyUser(Shop $shop, string $userId, string $message): void
     {
+        // ========== デバッグ用コード（本番では削除すること） ==========
+        // デバッグユーザーIDの場合はLINE通知をスキップ
+        // if (str_starts_with($userId, 'DEBUG_USER_')) {
+        //     \Log::info('DEBUG: LINE notification skipped', [
+        //         'user_id' => $userId,
+        //         'message' => $message
+        //     ]);
+        //     return;
+        // }
+        // ========== デバッグ用コード ここまで ==========
+
         $messagingApi = $this->getMessagingApi($shop->line_access_token);
 
         \Log::debug('LINE push start', [

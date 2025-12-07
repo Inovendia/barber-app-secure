@@ -58,6 +58,14 @@ Route::post('/liff/entry', [LiffEntryController::class, 'entry'])->name('liff.en
 // --------------------------
 Route::prefix('reserve/{token}')->name('reserve.')->group(function () {
     Route::get('/form', [ReservationFormController::class, 'create'])->name('form'); // 予約フォーム表示
+    
+    // ========== デバッグ用ルート（本番では削除すること） ==========
+    // Route::get('/form-debug', function($token) {
+    //     $shop = \App\Models\Shop::where('public_token', $token)->firstOrFail();
+    //     return view('reserve.form_debug', compact('shop'));
+    // })->name('form.debug'); // デバッグ用フォーム
+    // ========== デバッグ用ルート ここまで ==========
+    
     Route::match(['get', 'post'], '/calendar', [ReservationFormController::class, 'calender'])->name('calender');
     Route::post('/confirmation', [ReservationFormController::class, 'showConfirmation'])->name('confirmation'); // 確認画面
     Route::post('/complete', [ReservationFormController::class, 'store'])->name('store'); // 登録処理
