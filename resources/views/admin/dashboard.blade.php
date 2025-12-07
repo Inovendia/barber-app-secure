@@ -426,35 +426,84 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!calendarEl) return;
 
     const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
+        initialView: 'dayGridWeek',
         locale: 'ja',
         height: 'auto',
         firstDay: 1,
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: ''
+            right: 'dayGridWeek,dayGridMonth'
+        },
+        buttonText: {
+            today: '今日',
+            week: '週',
+            month: '月'
         },
         events: '/admin/reservations/json',
 
-        // ✅ ピンクを淡く（彩度を落とす）
-        eventColor: '#f9a8d4', // ← 薄いピンク（Tailwindの pink-300 に近い）
-        eventTextColor: '#000', // 文字は黒でコントラストを確保
+        eventTextColor: '#000',
 
-        // ✅ イベントの表示まわり
-        dayMaxEventRows: true,
+        dayMaxEventRows: false,
         moreLinkClick: 'popover',
         eventDisplay: 'block',
 
+        // イベントごとに色を設定
         eventDidMount: function(info) {
-            // 折り返し許可＋内側余白で見やすく
-            info.el.style.whiteSpace = 'normal';
-            info.el.style.lineHeight = '1.3';
-            info.el.style.padding = '4px 6px';
-            info.el.style.borderRadius = '6px';
-            info.el.style.overflow = 'visible';
-            info.el.style.textOverflow = 'unset';
-            info.el.style.fontSize = '0.85rem';
+            const isBreak = info.event.extendedProps.isBreak;
+            
+            if (isBreak) {
+                info.el.style.backgroundColor = '#bfdbfe';
+                info.el.style.borderColor = '#93c5fd';
+            } else {
+                info.el.style.backgroundColor = '#f9a8d4';
+                info.el.style.borderColor = '#f472b6';
+            }
+        },
+
+        // イベントの内容をカスタマイズ
+        eventContent: function(arg) {
+            const event = arg.event;
+            const props = event.extendedProps;
+            
+            const container = document.createElement('div');
+            container.style.padding = '4px';
+            container.style.lineHeight = '1.6';
+            
+            if (props.isBreak) {
+                // 休憩ボックスの表示
+                const breakLabel = document.createElement('div');
+                breakLabel.style.fontWeight = 'bold';
+                breakLabel.style.fontSize = '0.9rem';
+                breakLabel.style.color = '#1e40af';
+                breakLabel.textContent = '30分休憩';
+                container.appendChild(breakLabel);
+                
+                const name = document.createElement('div');
+                name.style.fontSize = '0.85rem';
+                name.style.color = '#1e40af';
+                name.textContent = props.name || '';
+                container.appendChild(name);
+            } else {
+                // 通常の予約ボックスの表示
+                const time = document.createElement('div');
+                time.style.fontWeight = 'bold';
+                time.style.fontSize = '0.95rem';
+                time.textContent = event.start.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+                container.appendChild(time);
+                
+                const name = document.createElement('div');
+                name.style.fontSize = '0.9rem';
+                name.textContent = props.name || '未登録';
+                container.appendChild(name);
+                
+                const menu = document.createElement('div');
+                menu.style.fontSize = '0.85rem';
+                menu.textContent = props.menu || '未設定';
+                container.appendChild(menu);
+            }
+            
+            return { domNodes: [container] };
         },
 
         // ✅ 時間表記を明示的に2桁＋コロン付きにして見切れ防止
@@ -474,19 +523,26 @@ document.addEventListener('DOMContentLoaded', function() {
 /* FullCalendar イベント見切れ対策 */
 .fc .fc-daygrid-event {
   white-space: normal !important;
-  line-height: 1.4 !important;
-  padding: 4px 6px !important;
+  line-height: 1.6 !important;
+  padding: 6px !important;
   border-radius: 6px !important;
-  overflow: visible !important;   /* ← 高さ制限を解除 */
+  overflow: visible !important;
+  font-size: 1.0rem !important;
+  font-weight: normal !important;
+  min-height: 3.5rem !important;
 }
 
 .fc .fc-event-title,
 .fc .fc-event-time {
-  overflow: visible !important;   /* ← 時間や文字の切れを防止 */
+  overflow: visible !important;
   text-overflow: unset !important;
   white-space: normal !important;
-  display: inline-block !important;
-  vertical-align: middle !important;
+  display: block !important;
+}
+
+/* 週表示用の追加スタイル */
+.fc-dayGridWeek-view .fc-daygrid-day-frame {
+  min-height: 150px !important;
 }
 </style>
 

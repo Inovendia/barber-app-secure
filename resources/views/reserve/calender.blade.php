@@ -47,7 +47,7 @@
                 </div>
             </div>
 
-            <div class="p-2 sm:p-4 text-gray-800 w-full">
+            <div class="text-gray-800 w-full">
                 <form method="POST" action="{{ route('reserve.confirmation', ['token' => $token]) }}">
                     @csrf
                     <input type="hidden" name="line_user_id" value="{{ request('line_user_id') }}">
@@ -57,120 +57,116 @@
                     <input type="hidden" name="menu" value="{{ request('menu') }}">
                     <input type="hidden" name="shop_id" value="{{ $shop->id }}">
                     <input type="hidden" id="reserved_at" name="reserved_at" value="">
+                    
+                    <div class="-mx-6 border-t border-b overflow-x-auto">
+                        <table class="min-w-[900px] text-center text-sm"
+                            style="border-collapse: separate; border-spacing: 0;">
+                            <thead>
+                                <tr class="bg-gray-100 text-xs">
+                                    <!-- 時間列（固定される） -->
+                                    <th class="bg-gray-100 px-2 py-1 whitespace-nowrap"
+                                        style="position: sticky; left: 0; z-index: 20; width: 60px; min-width: 60px; border-right: 1px solid #ddd; border-bottom: 2px solid #ccc;">
+                                        時間
+                                    </th>
 
-                    <div class="w-full overflow-x-auto border rounded">
-                        <div class="min-w-[900px]">
-                            <table class="w-full text-center text-sm table-auto border-collapse">
-                                <thead>
-                                    <tr class="bg-gray-100 text-xs">
-                                        <th class="border px-1 py-1 w-[50px] whitespace-nowrap">時間</th>
-                                        @foreach ($dates as $date)
-                                        <th class="border px-1 py-1 w-[50px] whitespace-nowrap leading-tight">
+                                    @foreach ($dates as $date)
+                                        <th class="px-2 py-1 whitespace-nowrap leading-tight"
+                                            style="border-bottom: 2px solid #ccc; border-right: 1px solid #eee;">
                                             <div>{{ $date->format('n/j') }}</div>
                                             <div>({{ ['日','月','火','水','木','金','土'][$date->dayOfWeek] }})</div>
                                         </th>
-                                        @endforeach
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ([
+                                    @endforeach
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach ([
                                     '8:00','8:30','9:00','9:30','10:00','10:30',
                                     '11:00','11:30','12:00','12:30','13:00','13:30',
                                     '14:00','14:30','15:00','15:30','16:00','16:30',
                                     '17:00','17:30','18:00','18:30','19:00','19:30','20:00',
-                                    ] as $time)
+                                ] as $time)
                                     <tr>
-                                        <td class="border px-2 py-1 bg-gray-50 font-medium whitespace-nowrap">{{ $time }}</td>
+                                        <!-- 左端時間列（sticky & 固定） -->
+                                        <td class="bg-gray-50 px-2 py-1 whitespace-nowrap font-medium"
+                                            style="position: sticky; left: 0; z-index: 20; border-right: 1px solid #ddd; border-bottom: 1px solid #eee;">
+                                            {{ $time }}
+                                        </td>
+
                                         @foreach ($dates as $i => $date)
-                                        @php
-                                        $now = \Carbon\Carbon::now();
-                                        $start = $date->copy()->setTimeFromTimeString($time);
-                                        $end = $start->copy()->addMinutes($duration);
+                                            @php
+                                                $now = \Carbon\Carbon::now();
+                                                $start = $date->copy()->setTimeFromTimeString($time);
+                                                $end = $start->copy()->addMinutes($duration);
 
-                                        $isToday = $date->isSameDay($now);
-                                        $isPast = $isToday && $start->lt($now);
-                                        $isWithin1Hour = $isToday && $start->between($now, $now->copy()->addHour());
+                                                $isToday = $date->isSameDay($now);
+                                                $isPast = $isToday && $start->lt($now);
+                                                $isWithin1Hour = $isToday && $start->between($now, $now->copy()->addHour());
+                                                $dayOfWeek = $date->dayOfWeek;
+                                                $isClosed = in_array($dayOfWeek, $closedDays);
 
-                                        $dayOfWeek = $date->dayOfWeek;
-                                        $isClosed = in_array($dayOfWeek, $closedDays);
+                                                $lunchStartTime = $start->copy()->setTimeFromTimeString($lunchStart);
+                                                $lunchEndTime = $start->copy()->setTimeFromTimeString($lunchEnd)->subMinute();
+                                                $isLunchTime = $start->between($lunchStartTime, $lunchEndTime);
 
-                                        $lunchStartTime = $start->copy()->setTimeFromTimeString($lunchStart);
-                                        $lunchEndTime = $start->copy()->setTimeFromTimeString($lunchEnd)->subMinute();
-                                        $isLunchTime = $start->between($lunchStartTime, $lunchEndTime);
+                                                $beforeOpening = $start->format('H:i') < \Carbon\Carbon::parse($businessStart)->format('H:i');
+                                                $afterClosing = $end->format('H:i') > \Carbon\Carbon::parse($businessEnd)->format('H:i');
 
-                                        $beforeOpening = $start->format('H:i') < \Carbon\Carbon::parse($businessStart)->format('H:i');
-                                            $afterClosing = $end->format('H:i') > \Carbon\Carbon::parse($businessEnd)->format('H:i');
+                                                $slotDateTime = $date->copy()->setTimeFromTimeString($time)->format('Y-m-d H:i');
+                                                $mark = $calenderMarks[$slotDateTime][0]->symbol ?? null;
 
-                                            $slotDateTime = $date->copy()->setTimeFromTimeString($start->format('H:i'))->format('Y-m-d H:i');
-                                            $mark = $calenderMarks[$slotDateTime][0]->symbol ?? null;
-
-                                            // 新規予約の施術時間内に既存予約があるかチェック
-                                            $isReserved = false;
-                                            $intervals = ceil($duration / 30);
-                                            for ($j = 0; $j < $intervals; $j++) {
-                                                $checkSlot = $start->copy()->addMinutes(30 * $j)->format('Y-m-d H:i');
-                                                if (isset($reservedSlots[$checkSlot])) {
-                                                    $isReserved = true;
-                                                    break;
+                                                // 新規予約の施術時間内に既存予約があれば ×
+                                                $isReserved = false;
+                                                $intervals = ceil($duration / 30);
+                                                for ($j = 0; $j < $intervals; $j++) {
+                                                    $checkSlot = $start->copy()->addMinutes(30 * $j)->format('Y-m-d H:i');
+                                                    if (isset($reservedSlots[$checkSlot])) {
+                                                        $isReserved = true;
+                                                        break;
+                                                    }
                                                 }
-                                            }
-                                            
-                                            $isOutOfBusiness = $beforeOpening || $afterClosing || $isLunchTime;
 
-                                            $normalizedMark = $mark ? trim(mb_convert_kana($mark, 'as')) : null;
+                                                $isOutOfBusiness = $beforeOpening || $afterClosing || $isLunchTime;
+                                                $normalizedMark = $mark ? trim(mb_convert_kana($mark, 'as')) : null;
 
-                                            if ($normalizedMark) {
-                                            // 管理者が手動で設定した記号があれば優先
-                                            $displaySymbol = $normalizedMark === '◯' ? '◎' : $normalizedMark;
-                                            } elseif ($isPast || $isClosed || $isOutOfBusiness || $isReserved) {
-                                            $displaySymbol = '×';
-                                            } elseif ($isWithin1Hour) {
-                                            $displaySymbol = '📞';
-                                            } else {
-                                            $displaySymbol = '◎';
-                                            }
+                                                if ($normalizedMark) {
+                                                    $displaySymbol = $normalizedMark === '◯' ? '◎' : $normalizedMark;
+                                                } elseif ($isPast || $isClosed || $isOutOfBusiness || $isReserved) {
+                                                    $displaySymbol = '×';
+                                                } elseif ($isWithin1Hour) {
+                                                    $displaySymbol = '📞';
+                                                } else {
+                                                    $displaySymbol = '◎';
+                                                }
 
-                                            $isSelectable = $displaySymbol === '◎';
-                                            $cellClasses = 'border px-2 py-1 whitespace-nowrap text-center ' . ($isSelectable ? 'cursor-pointer' : '');
-                                            $isPhoneSymbol = $normalizedMark === 'tel' || $displaySymbol === '📞';
-
-                                            if ($displaySymbol === '×') {
-                                            $inlineStyle = 'background-color: #f3f4f6; color: #9ca3af;';
-                                            } elseif ($displaySymbol === '◎') {
-                                            $inlineStyle = 'color: #e11d48;';
-                                            } else {
-                                            $inlineStyle = '';
-                                            }
+                                                $isSelectable = $displaySymbol === '◎';
+                                                $isPhone = $displaySymbol === '📞';
                                             @endphp
 
                                             <td
-                                                class="{{ $cellClasses }}"
-                                                data-symbol="{{ $displaySymbol }}"
+                                                class="px-2 py-1 whitespace-nowrap text-center {{ $isSelectable ? 'cursor-pointer' : '' }}"
                                                 data-slot="{{ $slotDateTime }}"
-                                                @if (! $isPhoneSymbol && $isSelectable)
-                                                onclick="selectTime('{{ $time }}', '{{ $i }}')"
-                                                onmouseenter="if(this.dataset.slot !== selectedSlot) this.style.backgroundColor = '#ffe4e6'"
-                                                onmouseleave="if(this.dataset.slot !== selectedSlot) this.style.backgroundColor = ''"
-                                                @endif
-                                                style="{{ $inlineStyle }}">
-
-
-                                                @if ($displaySymbol === 'tel' || $displaySymbol === '📞')
-                                                <a href="tel:{{ $shopPhone ?? '09012345678' }}"
-                                                    onclick="event.stopPropagation()"
-                                                    class="inline-block text-blue-600 underline hover:text-blue-800 cursor-pointer">
-                                                    📞
-                                                </a>
+                                                data-symbol="{{ $displaySymbol }}"
+                                                onclick="{{ $isSelectable ? "selectTime('$time', '$i')" : '' }}"
+                                                onmouseenter="if(this.dataset.symbol==='◎' && this.dataset.slot!==selectedSlot){this.style.backgroundColor='#ffe4e6'}"
+                                                onmouseleave="if(this.dataset.slot!==selectedSlot){if(this.dataset.symbol==='×'){this.style.backgroundColor='#f3f4f6'}else{this.style.backgroundColor=''}}"
+                                                style="border-right: 1px solid #eee; border-bottom: 1px solid #eee;
+                                                    {{ $displaySymbol === '×' ? 'background:#f3f4f6;color:#9ca3af;' : '' }}
+                                                    {{ $displaySymbol === '◎' ? 'color:#e11d48;' : '' }}">
+                                                @if ($isPhone)
+                                                    <a href="tel:{{ $shopPhone }}" onclick="event.stopPropagation()"
+                                                    class="text-blue-600 underline">
+                                                        📞
+                                                    </a>
                                                 @else
-                                                {{ $displaySymbol }}
+                                                    {{ $displaySymbol }}
                                                 @endif
                                             </td>
-                                            @endforeach
+                                        @endforeach
                                     </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
 
                     <div class="mt-6">
