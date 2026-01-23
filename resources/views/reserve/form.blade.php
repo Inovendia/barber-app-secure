@@ -34,12 +34,14 @@
 
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700">お名前</label>
-                <input id="name" type="text" class="w-full border p-2 rounded" required>
+                <input id="name" type="text" class="w-full border p-2 rounded" required
+                    value="{{ $existingUser->name ?? '' }}">
             </div>
 
             <div>
                 <label for="phone" class="block text-sm font-medium text-gray-700">電話番号</label>
-                <input id="phone" type="text" class="w-full border p-2 rounded" required>
+                <input id="phone" type="text" class="w-full border p-2 rounded" required
+                    value="{{ $existingUser->phone ?? '' }}">
             </div>
 
             <!-- カテゴリー選択 -->
@@ -140,6 +142,13 @@ function updateMenuOptions() {
         }
 
         if (userId) {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (!urlParams.has('line_user_id')) {
+                urlParams.set('line_user_id', userId);
+                window.location.href = window.location.pathname + '?' + urlParams.toString();
+                return;
+            }
+
             hiddenUserId.value = userId;
             submitBtn.disabled = false;
             submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
