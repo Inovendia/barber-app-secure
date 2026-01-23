@@ -26,9 +26,17 @@ class ReservationFormController extends Controller
         $shop = Shop::where('public_token', $token)->firstOrFail();
         $lineUserId = $request->query('line_user_id');
 
+        $existingUser = null;
+        if ($lineUserId) {
+            $existingUser = User::where('shop_id', $shop->id)
+                ->where('line_user_id', $lineUserId)
+                ->first();
+        }
+
         return view('reserve.form', [
             'lineUserId' => $lineUserId,
             'shop' => $shop,
+            'existingUser' => $existingUser,
         ]);
     }
 
@@ -172,8 +180,6 @@ class ReservationFormController extends Controller
             'alreadyCanceled'  => false,
         ]);
     }
-
-
 
     public function calender(Request $request, $token)
     {
