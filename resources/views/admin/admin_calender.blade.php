@@ -29,6 +29,12 @@
         }
 
         $calenderDates = array_map(fn($d) => $d->format('Y-m-d'), $dates);
+        $timeOptions = [
+            '08:00','08:30','09:00','09:30','10:00','10:30',
+            '11:00','11:30','12:00','12:30','13:00','13:30',
+            '14:00','14:30','15:00','15:30','16:00','16:30',
+            '17:00','17:30','18:00','18:30','19:00','19:30','20:00',
+        ];
     @endphp
 
     <div
@@ -64,8 +70,91 @@
         </div>
 
         <template x-if="symbolMode">
-            <div class="mb-2 px-2 sm:px-0">
-                <span class="text-sm text-gray-600">※記号を設定するには日時をクリックしてください</span>
+            <div class="mb-2 px-2 sm:px-0 space-y-2">
+                <span class="text-sm text-gray-600 block">※記号を設定するには日時をクリックしてください</span>
+                <div class="border rounded p-3 bg-gray-50">
+                    <form method="POST" action="{{ route('admin.calender_marks.bulk') }}" class="flex flex-wrap items-end gap-2 pl-4">
+                        @csrf
+
+                        <!-- 開始グループ -->
+                        <div class="flex flex-wrap items-end gap-2">
+                            <div>
+                                <label class="block text-xs text-gray-600">開始日</label>
+                                <input type="date" name="start_date" class="border rounded px-2 py-1"
+                                    value="{{ old('start_date', $dates[0]->format('Y-m-d')) }}" required>
+                            </div>
+
+                            <div class="min-w-[140px]">
+                                <label class="block text-xs text-gray-600">開始時間</label>
+                                <div style="position:relative; display:inline-block;">
+                                    <select name="start_time"
+                                        class="border rounded px-3 py-1 bg-white"
+                                        style="-webkit-appearance:none; appearance:none; padding-right:2.5rem; min-width:100px;"
+                                        required>
+                                        @foreach ($timeOptions as $timeOption)
+                                            <option value="{{ $timeOption }}"
+                                                @selected(old('start_time', \Carbon\Carbon::parse($businessStart)->format('H:i')) === $timeOption)>
+                                                {{ $timeOption }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <svg style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); pointer-events:none; width:1rem; height:1rem; color:#9ca3af;"
+                                        viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 伸びる余白 + 区切り -->
+                        <div class="flex items-center gap-2 px-4">
+                            <span class="text-gray-500 font-semibold">〜</span>
+                        </div>
+
+                        <!-- 終了グループ -->
+                        <div class="flex flex-wrap items-end gap-2">
+                            <div>
+                                <label class="block text-xs text-gray-600">終了日</label>
+                                <input type="date" name="end_date" class="border rounded px-2 py-1"
+                                    value="{{ old('end_date', $dates[0]->copy()->addDay()->format('Y-m-d')) }}" required>
+                            </div>
+
+                            <div class="min-w-[140px]">
+                                <label class="block text-xs text-gray-600">終了時間</label>
+                                <div style="position:relative; display:inline-block;">
+                                    <select name="end_time"
+                                        class="border rounded px-3 py-1 bg-white"
+                                        style="-webkit-appearance:none; appearance:none; padding-right:2.5rem; min-width:100px;"
+                                        required>
+                                        @foreach ($timeOptions as $timeOption)
+                                            <option value="{{ $timeOption }}"
+                                                @selected(old('end_time', \Carbon\Carbon::parse($businessEnd)->format('H:i')) === $timeOption)>
+                                                {{ $timeOption }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <svg style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); pointer-events:none; width:1rem; height:1rem; color:#9ca3af;"
+                                        viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 以下そのまま -->
+                        <div class="ml-4">
+                            <label class="block text-xs text-gray-600">記号</label>
+                            <select name="symbol" class="border rounded px-2 py-1" required>
+                                <option value="◎" @selected(old('symbol', '◎') === '◎')>◎（予約可）</option>
+                                <option value="×" @selected(old('symbol') === '×')>×（予約不可）</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="ml-8 px-3 py-2 bg-blue-600 text-white rounded">
+                            期間一括設定
+                        </button>
+
+                        <span class="text-xs text-gray-500">※予約が入っている枠は除外されます</span>
+                    </form>
+                </div>
             </div>
         </template>
 
