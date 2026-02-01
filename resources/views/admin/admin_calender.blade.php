@@ -144,6 +144,7 @@
                             <label class="block text-xs text-gray-600">記号</label>
                             <select name="symbol" class="border rounded px-2 py-1" required>
                                 <option value="◎" @selected(old('symbol', '◎') === '◎')>◎（予約可）</option>
+                                <option value="tel" @selected(old('symbol') === 'tel')>tel（電話）</option>
                                 <option value="×" @selected(old('symbol') === '×')>×（予約不可）</option>
                             </select>
                         </div>

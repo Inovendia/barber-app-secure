@@ -62,7 +62,7 @@ class CalenderMarkController extends Controller
             'start_time' => 'required|date_format:H:i',
             'end_date' => 'required|date|after_or_equal:start_date',
             'end_time' => 'required|date_format:H:i',
-            'symbol' => 'required|string|in:×,◎',
+            'symbol' => 'required|string|in:×,tel,◎',
         ]);
 
         $admin = Auth::guard('admin')->user();
