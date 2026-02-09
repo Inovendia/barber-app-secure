@@ -219,10 +219,12 @@
 
                                                 $normalizedMark = null;
 
-                                                if ($mark) {
+                                                if ($isReserved) {
+                                                    $displaySymbol = '×';
+                                                } elseif ($mark) {
                                                     $normalizedMark = trim(mb_convert_kana($mark, 'as'));
                                                     $displaySymbol = $normalizedMark;
-                                                } elseif ($isClosed || $isReserved || $isOutOfBusiness) {
+                                                } elseif ($isClosed || $isOutOfBusiness) {
                                                     $displaySymbol = '×';
                                                 } else {
                                                     $displaySymbol = '◎';
