@@ -129,7 +129,7 @@
 
                                                 $isOutOfBusiness = $beforeOpening || $afterClosing || $isLunchTime;
                                                 $normalizedMark = $mark ? trim(mb_convert_kana($mark, 'as')) : null;
-                                                $isHighToneMenu = request('menu') === 'ハイトーンカラー (青や金など ※要相談) 14,700円~';
+                                                $isHighToneMenu = request('menu') === 'ハイトーンカラー (青・金など要ブリーチ ※要相談) 14,700円~';
 
                                                 if ($normalizedMark) {
                                                     $displaySymbol = $normalizedMark === '◯' ? '◎' : $normalizedMark;
