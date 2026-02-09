@@ -137,10 +137,11 @@
                                                     $displaySymbol = '×';
                                                 } elseif ($isWithin1Hour) {
                                                     $displaySymbol = '📞';
-                                                } elseif ($isHighToneMenu) {
-                                                    $displaySymbol = '📞';
                                                 } else {
                                                     $displaySymbol = '◎';
+                                                }
+                                                if ($isHighToneMenu && $displaySymbol === '◎') {
+                                                    $displaySymbol = '📞';
                                                 }
 
                                                 $isSelectable = $displaySymbol === '◎';
