@@ -20,7 +20,8 @@
         $reservedSlots = [];
         foreach ($confirmedReservations as $reservation) {
             $start = \Carbon\Carbon::parse($reservation->reserved_at);
-            $menuDuration = $reservation->duration ?? ($menuDurations[$reservation->menu] ?? 60);
+            $categoryDuration = $reservation->category ? ($categoryDurations[$reservation->category] ?? null) : null;
+            $menuDuration = $reservation->duration ?? $categoryDuration ?? ($legacyMenuDurations[$reservation->menu] ?? 60);
             $intervals = ceil($menuDuration / 30);
             for ($i = 0; $i < $intervals; $i++) {
                 $slot = $start->copy()->addMinutes(30 * $i)->format('Y-m-d H:i');
