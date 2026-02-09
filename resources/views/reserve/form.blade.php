@@ -50,8 +50,9 @@
                 <select id="category" class="w-full border p-2 rounded" required onchange="updateMenuOptions()">
                     <option value="">-- 選択してください --</option>
                     <option value="cut">カット</option>
-                    <option value="perm">パーマ</option>
+                    <option value="cut_color">カット＋カラー</option>
                     <option value="color">カラー</option>
+                    <option value="perm">パーマ</option>
                 </select>
             </div>
 
@@ -97,8 +98,9 @@ function updateMenuOptions() {
 
     const menuOptions = {
         cut:   ['一般 4600円', 'カットのみ 3500円', '高校生 3600円', '中学生 3100円', '小学生 2700円'],
+        cut_color: ['白髪染めやブラウン 9600円~', '白髪ぼかし 7100円~', 'ハイトーンカラー (青や金など ※要相談) 14,700円~'],
         perm:  ['ノーマル 9500円〜', 'ピンパーマ 13500円〜', 'スパイラル 13500円〜'],
-        color: ['ブリーチ 5500円〜（2回目以降から+4500円ずつ）', 'ノーマルカラー 5000円〜', 'グレイカラー 2300円〜'],
+        color: ['ノーマルカラー(白髪染め・ブラウン・ブラック) 5000円~', 'グレイカラー 2300円~', 'ブリーチ 5500円~'],
     };
 
     if (menuOptions[category]) {

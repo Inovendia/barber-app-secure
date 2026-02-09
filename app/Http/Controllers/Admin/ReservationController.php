@@ -36,24 +36,37 @@ class ReservationController extends Controller
             $dates->push($baseDate->copy()->addDays($i));
         }
 
-        $menuDurations = [
+        $categoryDurations = [
+            'cut' => 60,
+            'color' => 60,
+            'cut_color' => 120,
+            'perm' => 150,
+        ];
+        $legacyMenuDurations = [
             '一般 4600円' => 60,
             'カットのみ 3500円' => 60,
             '高校生 3600円' => 60,
             '中学生 3100円' => 60,
             '小学生 2700円' => 60,
-            'ノーマル 9500円〜' => 180,
-            'ピンパーマ 13500円〜' => 180,
-            'スパイラル 13500円〜' => 180,
-            'ブリーチ 5500円〜（2回目以降から+4500円ずつ）' => 150,
-            'ノーマルカラー 5000円〜' => 150,
-            'グレイカラー 2300円〜' => 150,
+            'ノーマル 9500円〜' => 150,
+            'ピンパーマ 13500円〜' => 150,
+            'スパイラル 13500円〜' => 150,
+            'ブリーチ 5500円〜（2回目以降から+4500円ずつ）' => 60,
+            'ノーマルカラー 5000円〜' => 60,
+            'グレイカラー 2300円〜' => 60,
+            '白髪染めやブラウン 9600円~' => 120,
+            '白髪ぼかし 7100円~' => 120,
+            'ハイトーンカラー (青や金など ※要相談) 14,700円~' => 120,
+            'ノーマルカラー(白髪染め・ブラウン・ブラック) 5000円~' => 60,
+            'グレイカラー 2300円~' => 60,
+            'ブリーチ 5500円~' => 60,
         ];
 
         $admin = Auth::guard('admin')->user();
 
         $menu = $request->menu;
-        $duration = $menuDurations[$menu] ?? 60;
+        $duration = $categoryDurations[$request->category]
+            ?? ($legacyMenuDurations[$menu] ?? 60);
 
         $shop = $admin->shop;
         $closedDays = explode(',', $shop->closed_days ?? '');
@@ -92,7 +105,8 @@ class ReservationController extends Controller
             'shopPhone' => $shop->phone,
             'note' => $request->note,
             'confirmedReservations' => $confirmedReservations,
-            'menuDurations' => $menuDurations,
+            'categoryDurations' => $categoryDurations,
+            'legacyMenuDurations' => $legacyMenuDurations,
             'calenderMarks' => $calenderMarks,
         ]);
     }
@@ -162,21 +176,34 @@ class ReservationController extends Controller
         );
 
         // メニューごとの基本施術時間
-        $menuDurations = [
+        $categoryDurations = [
+            'cut' => 60,
+            'color' => 60,
+            'cut_color' => 120,
+            'perm' => 150,
+        ];
+        $legacyMenuDurations = [
             '一般 4600円' => 60,
             'カットのみ 3500円' => 60,
             '高校生 3600円' => 60,
             '中学生 3100円' => 60,
             '小学生 2700円' => 60,
-            'ノーマル 9500円〜' => 180,
-            'ピンパーマ 13500円〜' => 180,
-            'スパイラル 13500円〜' => 180,
-            'ブリーチ 5500円〜（2回目以降から+4500円ずつ）' => 150,
-            'ノーマルカラー 5000円〜' => 150,
-            'グレイカラー 2300円〜' => 150,
+            'ノーマル 9500円〜' => 150,
+            'ピンパーマ 13500円〜' => 150,
+            'スパイラル 13500円〜' => 150,
+            'ブリーチ 5500円〜（2回目以降から+4500円ずつ）' => 60,
+            'ノーマルカラー 5000円〜' => 60,
+            'グレイカラー 2300円〜' => 60,
+            '白髪染めやブラウン 9600円~' => 120,
+            '白髪ぼかし 7100円~' => 120,
+            'ハイトーンカラー (青や金など ※要相談) 14,700円~' => 120,
+            'ノーマルカラー(白髪染め・ブラウン・ブラック) 5000円~' => 60,
+            'グレイカラー 2300円~' => 60,
+            'ブリーチ 5500円~' => 60,
         ];
 
-        $baseDuration = $menuDurations[$data['menu']] ?? 60;
+        $baseDuration = $categoryDurations[$data['category']]
+            ?? ($legacyMenuDurations[$data['menu']] ?? 60);
         $reservedAt = Carbon::parse($data['reserved_at']);
 
         // 連続予約チェック: 直前の予約を検索
@@ -184,8 +211,11 @@ class ReservationController extends Controller
             ->where('status', 'confirmed')
             ->whereDate('reserved_at', $reservedAt->toDateString())
             ->get()
-            ->first(function ($res) use ($reservedAt, $menuDurations) {
-                $resDuration = $res->duration ?? ($menuDurations[$res->menu] ?? 60);
+            ->first(function ($res) use ($reservedAt, $categoryDurations, $legacyMenuDurations) {
+                $categoryDuration = $res->category ? ($categoryDurations[$res->category] ?? null) : null;
+                $resDuration = $res->duration
+                    ?? $categoryDuration
+                    ?? ($legacyMenuDurations[$res->menu] ?? 60);
                 $resEnd = Carbon::parse($res->reserved_at)->addMinutes($resDuration);
                 return $resEnd->equalTo($reservedAt);
             });

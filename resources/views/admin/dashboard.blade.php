@@ -50,6 +50,7 @@
                             @php
                                 $categoryLabels = [
                                     'cut' => 'カット',
+                                    'cut_color' => 'カット＋カラー',
                                     'perm' => 'パーマ',
                                     'color' => 'カラー',
                                 ];
@@ -549,4 +550,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 </x-app-layout>
-

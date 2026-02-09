@@ -60,22 +60,34 @@ class ReservationFormController extends Controller
             ['name' => $validated['name'], 'phone' => $validated['phone']]
         );
 
-        // メニューごとの基本施術時間
-        $menuDurations = [
+        $categoryDurations = [
+            'cut' => 60,
+            'color' => 60,
+            'cut_color' => 120,
+            'perm' => 150,
+        ];
+        $legacyMenuDurations = [
             '一般 4600円' => 60,
             'カットのみ 3500円' => 60,
             '高校生 3600円' => 60,
             '中学生 3100円' => 60,
             '小学生 2700円' => 60,
-            'ノーマル 9500円〜' => 180,
-            'ピンパーマ 13500円〜' => 180,
-            'スパイラル 13500円〜' => 180,
-            'ブリーチ 5500円〜（2回目以降から+4500円ずつ）' => 150,
-            'ノーマルカラー 5000円〜' => 150,
-            'グレイカラー 2300円〜' => 150,
+            'ノーマル 9500円〜' => 150,
+            'ピンパーマ 13500円〜' => 150,
+            'スパイラル 13500円〜' => 150,
+            'ブリーチ 5500円〜（2回目以降から+4500円ずつ）' => 60,
+            'ノーマルカラー 5000円〜' => 60,
+            'グレイカラー 2300円〜' => 60,
+            '白髪染めやブラウン 9600円~' => 120,
+            '白髪ぼかし 7100円~' => 120,
+            'ハイトーンカラー (青や金など ※要相談) 14,700円~' => 120,
+            'ノーマルカラー(白髪染め・ブラウン・ブラック) 5000円~' => 60,
+            'グレイカラー 2300円~' => 60,
+            'ブリーチ 5500円~' => 60,
         ];
 
-        $baseDuration = $menuDurations[$validated['menu']] ?? 60;
+        $baseDuration = $categoryDurations[$validated['category']]
+            ?? ($legacyMenuDurations[$validated['menu']] ?? 60);
         $reservedAt = Carbon::parse($validated['reserved_at']);
 
         // 連続予約チェック: 直前の予約を検索
@@ -83,8 +95,11 @@ class ReservationFormController extends Controller
             ->where('status', 'confirmed')
             ->whereDate('reserved_at', $reservedAt->toDateString())
             ->get()
-            ->first(function ($res) use ($reservedAt, $menuDurations) {
-                $resDuration = $res->duration ?? ($menuDurations[$res->menu] ?? 60);
+            ->first(function ($res) use ($reservedAt, $categoryDurations, $legacyMenuDurations) {
+                $categoryDuration = $res->category ? ($categoryDurations[$res->category] ?? null) : null;
+                $resDuration = $res->duration
+                    ?? $categoryDuration
+                    ?? ($legacyMenuDurations[$res->menu] ?? 60);
                 $resEnd = Carbon::parse($res->reserved_at)->addMinutes($resDuration);
                 return $resEnd->equalTo($reservedAt);
             });
@@ -195,22 +210,35 @@ class ReservationFormController extends Controller
             $dates->push($baseDate->copy()->addDays($i));
         }
 
-        $menuDurations = [
+        $categoryDurations = [
+            'cut' => 60,
+            'color' => 60,
+            'cut_color' => 120,
+            'perm' => 150,
+        ];
+        $legacyMenuDurations = [
             '一般 4600円' => 60,
             'カットのみ 3500円' => 60,
             '高校生 3600円' => 60,
             '中学生 3100円' => 60,
             '小学生 2700円' => 60,
-            'ノーマル 9500円〜' => 180,
-            'ピンパーマ 13500円〜' => 180,
-            'スパイラル 13500円〜' => 180,
-            'ブリーチ 5500円〜（2回目以降から+4500円ずつ）' => 150,
-            'ノーマルカラー 5000円〜' => 150,
-            'グレイカラー 2300円〜' => 150,
+            'ノーマル 9500円〜' => 150,
+            'ピンパーマ 13500円〜' => 150,
+            'スパイラル 13500円〜' => 150,
+            'ブリーチ 5500円〜（2回目以降から+4500円ずつ）' => 60,
+            'ノーマルカラー 5000円〜' => 60,
+            'グレイカラー 2300円〜' => 60,
+            '白髪染めやブラウン 9600円~' => 120,
+            '白髪ぼかし 7100円~' => 120,
+            'ハイトーンカラー (青や金など ※要相談) 14,700円~' => 120,
+            'ノーマルカラー(白髪染め・ブラウン・ブラック) 5000円~' => 60,
+            'グレイカラー 2300円~' => 60,
+            'ブリーチ 5500円~' => 60,
         ];
 
         $menu = $request->menu;
-        $duration = $menuDurations[$menu] ?? 60;
+        $duration = $categoryDurations[$request->category]
+            ?? ($legacyMenuDurations[$menu] ?? 60);
 
         $shop = Shop::where('public_token', $token)->firstOrFail();
         $shopId = $shop->id;
@@ -255,7 +283,8 @@ class ReservationFormController extends Controller
             'businessEnd' => $shop->business_end,
             'shopPhone' => $shop->phone,
             'confirmedReservations' => $confirmedReservations,
-            'menuDurations' => $menuDurations,
+            'categoryDurations' => $categoryDurations,
+            'legacyMenuDurations' => $legacyMenuDurations,
             'calenderMarks' => $calenderMarks,
             'token' => $token,
             'shop' => $shop,
@@ -284,22 +313,35 @@ class ReservationFormController extends Controller
             $dates[] = $today->copy()->addDays($i);
         }
 
-        $menuDurations = [
+        $categoryDurations = [
+            'cut' => 60,
+            'color' => 60,
+            'cut_color' => 120,
+            'perm' => 150,
+        ];
+        $legacyMenuDurations = [
             '一般 4600円' => 60,
             'カットのみ 3500円' => 60,
             '高校生 3600円' => 60,
             '中学生 3100円' => 60,
             '小学生 2700円' => 60,
-            'ノーマル 9500円〜' => 180,
-            'ピンパーマ 13500円〜' => 180,
-            'スパイラル 13500円〜' => 180,
-            'ブリーチ 5500円〜（2回目以降から+4500円ずつ）' => 150,
-            'ノーマルカラー 5000円〜' => 150,
-            'グレイカラー 2300円〜' => 150,
+            'ノーマル 9500円〜' => 150,
+            'ピンパーマ 13500円〜' => 150,
+            'スパイラル 13500円〜' => 150,
+            'ブリーチ 5500円〜（2回目以降から+4500円ずつ）' => 60,
+            'ノーマルカラー 5000円〜' => 60,
+            'グレイカラー 2300円〜' => 60,
+            '白髪染めやブラウン 9600円~' => 120,
+            '白髪ぼかし 7100円~' => 120,
+            'ハイトーンカラー (青や金など ※要相談) 14,700円~' => 120,
+            'ノーマルカラー(白髪染め・ブラウン・ブラック) 5000円~' => 60,
+            'グレイカラー 2300円~' => 60,
+            'ブリーチ 5500円~' => 60,
         ];
 
         $menu = $request->menu;
-        $duration = $menuDurations[$menu] ?? 60;
+        $duration = $categoryDurations[$request->category]
+            ?? ($legacyMenuDurations[$menu] ?? 60);
 
         $shopId = $request->input('shop_id', 1); // デフォルト1店舗目
         $shop = Shop::findOrFail($shopId);
@@ -322,6 +364,8 @@ class ReservationFormController extends Controller
             'businessStart' => $shop->business_start,
             'businessEnd' => $shop->business_end,
             'shopPhone' => $shop->phone,
+            'categoryDurations' => $categoryDurations,
+            'legacyMenuDurations' => $legacyMenuDurations,
         ]);
     }
 
