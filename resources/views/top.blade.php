@@ -194,7 +194,7 @@
   </section>
 
   {{-- 特徴詳細 --}}
-  <section class="rz-feature" data-reveal="low">
+  <section class="rz-feature" data-reveal="low" id="rz-feature">
     <div class="rz-container">
 
       <div class="rz-fd">
@@ -265,6 +265,17 @@
       });
 
       targets.forEach(function (el) { observer.observe(el); });
+
+      var cards = document.querySelectorAll('.rz-card');
+      var feature = document.getElementById('rz-feature');
+      if (!cards.length || !feature) return;
+
+      var scrollBehavior = prefersReduced ? 'auto' : 'smooth';
+      cards.forEach(function (card) {
+        card.addEventListener('click', function () {
+          feature.scrollIntoView({ behavior: scrollBehavior, block: 'start' });
+        });
+      });
     });
   </script>
 
