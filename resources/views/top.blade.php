@@ -54,7 +54,7 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       max-width: 1000px;
-      margin: -40px auto 60px;
+      margin: 50px auto 60px;
       padding: 40px 20px;
       text-align: center;
     }
@@ -137,6 +137,27 @@
       text-decoration:underline;
       margin:0 4px;
     }
+
+    /* Scroll reveal (quiet, once) */
+    [data-reveal]{
+      opacity: 0;
+      transform: translateY(48px);
+      transition: opacity 240ms ease-out, transform 240ms ease-out;
+      will-change: opacity, transform;
+    }
+    [data-reveal].is-revealed{
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Reduced motion: show immediately */
+    @media (prefers-reduced-motion: reduce){
+      [data-reveal]{
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+    }
   </style>
 </head>
 
@@ -149,7 +170,7 @@
   </section>
 
   {{-- SaaS紹介 --}}
-  <section class="rz-intro rz-container">
+  <section class="rz-intro rz-container" data-reveal="mid">
     <h2>Rezamieの主な機能（複数店舗で利用可能なSaaS型サービス）</h2>
     <p>サービス全体はRezamieが運営し、各店舗は利用者として導入できます。</p>
 
@@ -173,7 +194,7 @@
   </section>
 
   {{-- 特徴詳細 --}}
-  <section class="rz-feature">
+  <section class="rz-feature" data-reveal="low">
     <div class="rz-container">
 
       <div class="rz-fd">
@@ -213,12 +234,39 @@
   </section>
 
   {{-- フッター帯 --}}
-  <div class="rz-footband">
+  <div class="rz-footband" data-reveal="foot">
     本サービスの提供主体（プロバイダー）はRezamieです。 /
     <a href="mailto:rezamie.info@gmail.com">rezamie.info@gmail.com</a> /
     <a href="{{ url('/support') }}">カスタマーサポート</a> /
     <a href="{{ url('/privacy') }}">プライバシーポリシー</a>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var targets = document.querySelectorAll('[data-reveal]');
+      if (!targets.length) return;
+
+      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) {
+        targets.forEach(function (el) { el.classList.add('is-revealed'); });
+        return;
+      }
+
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-revealed');
+          observer.unobserve(entry.target); // fire once
+        });
+      }, {
+        root: null,
+        threshold: 0,
+        rootMargin: '0px 0px -20% 0px'
+      });
+
+      targets.forEach(function (el) { observer.observe(el); });
+    });
+  </script>
 
 </body>
 </html>
