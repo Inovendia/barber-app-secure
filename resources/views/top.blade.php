@@ -170,7 +170,7 @@
   </section>
 
   {{-- SaaS紹介 --}}
-  <section class="rz-intro rz-container" data-reveal="mid">
+  <section class="rz-intro rz-container">
     <h2>Rezamieの主な機能（複数店舗で利用可能なSaaS型サービス）</h2>
     <p>サービス全体はRezamieが運営し、各店舗は利用者として導入できます。</p>
 
