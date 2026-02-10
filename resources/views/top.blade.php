@@ -234,7 +234,7 @@
   </section>
 
   {{-- フッター帯 --}}
-  <div class="rz-footband" data-reveal="foot">
+  <div class="rz-footband">
     本サービスの提供主体（プロバイダー）はRezamieです。 /
     <a href="mailto:rezamie.info@gmail.com">rezamie.info@gmail.com</a> /
     <a href="{{ url('/support') }}">カスタマーサポート</a> /
