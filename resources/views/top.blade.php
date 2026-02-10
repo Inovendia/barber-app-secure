@@ -33,8 +33,8 @@
     }
     .rz-hero img {
       position: absolute;
-      right: 0; bottom: 0;
-      width: 50%;
+      inset: 0;
+      width: 100%;
       height: 100%;
       object-fit: cover;
       opacity: 0.9;
