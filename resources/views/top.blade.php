@@ -145,7 +145,7 @@
   {{-- Heroセクション --}}
   <section class="rz-hero">
     <h1>LINEで、理美容の予約をもっと簡単に</h1>
-    <img src="{{ asset('images/###hero_salon.jpg') }}" alt="美容室で接客するスタッフの写真">
+    <img src="{{ asset('images/hero_salon.jpg') }}" alt="美容室で接客するスタッフの写真">
   </section>
 
   {{-- SaaS紹介 --}}
@@ -155,17 +155,17 @@
 
     <div class="rz-cards">
       <article class="rz-card">
-        <img src="{{ asset('images/###icon_line.png') }}" alt="LINEアイコン" class="mx-auto mb-4 w-14 h-14">
+        <img src="{{ asset('images/icon_line.png') }}" alt="LINEアイコン" class="mx-auto mb-4 w-14 h-14">
         <h3>LINE完結の予約体験</h3>
         <p>メニュー選択から日時確定まで、LINEミニアプリでスムーズに完了。</p>
       </article>
       <article class="rz-card">
-        <img src="{{ asset('images/###icon_calendar.png') }}" alt="カレンダーアイコン" class="mx-auto mb-4 w-14 h-14">
+        <img src="{{ asset('images/icon_calendar.png') }}" alt="カレンダーアイコン" class="mx-auto mb-4 w-14 h-14">
         <h3>わかりやすい予約カレンダー</h3>
         <p>所要時間・定休日・休憩時間を加味し、ムリのない枠表示で迷わない。</p>
       </article>
       <article class="rz-card">
-        <img src="{{ asset('images/###icon_bell.png') }}" alt="通知アイコン" class="mx-auto mb-4 w-14 h-14">
+        <img src="{{ asset('images/icon_bell.png') }}" alt="通知アイコン" class="mx-auto mb-4 w-14 h-14">
         <h3>通知・確認も自動で</h3>
         <p>予約完了／確認／キャンセルをLINEで自動通知。店舗とお客様の手間を削減。</p>
       </article>
@@ -183,7 +183,7 @@
           <p>メニュー所要時間や定休日・休憩時間を考慮し、ダブルブッキングを自動防止。</p>
         </div>
         <div class="visual">
-          <img src="{{ asset('images/###feature_01.png') }}" alt="予約カレンダー画面">
+          <img src="{{ asset('images/feature_01.png') }}" alt="予約カレンダー画面">
         </div>
       </div>
 
@@ -194,7 +194,7 @@
           <p>予約完了・前日リマインド・キャンセル受付をLINEで完結。無断キャンセルを防ぎます。</p>
         </div>
         <div class="visual">
-          <img src="{{ asset('images/###feature_02.png') }}" alt="LINE通知画面">
+          <img src="{{ asset('images/feature_02.png') }}" alt="LINE通知画面">
         </div>
       </div>
 
@@ -205,7 +205,7 @@
           <p>当日・翌日の予約確認、顧客メモ、カレンダー記号（×・tel・◎）の手動設定など運用を集約。</p>
         </div>
         <div class="visual">
-          <img src="{{ asset('images/###feature_03.png') }}" alt="管理者ダッシュボード画面">
+          <img src="{{ asset('images/feature_03.png') }}" alt="管理者ダッシュボード画面">
         </div>
       </div>
 
