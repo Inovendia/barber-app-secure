@@ -145,7 +145,7 @@
   {{-- Heroセクション --}}
   <section class="rz-hero">
     <h1>LINEで、理美容の予約をもっと簡単に</h1>
-    <img src="{{ asset('images/hero_salon.jpg') }}" alt="美容室で接客するスタッフの写真">
+    <img src="{{ asset('images/hero_salon.png') }}" alt="美容室で接客するスタッフの写真">
   </section>
 
   {{-- SaaS紹介 --}}
