@@ -33,6 +33,7 @@ class CalenderMarkController extends Controller
             'time' => $request->time,
         ],
         [   'symbol' => $request->symbol,
+            'is_manual' => true,
         ]
         );
 
@@ -58,16 +59,15 @@ class CalenderMarkController extends Controller
     public function bulk(Request $request)
     {
         $request->validate([
-            'start_date' => 'required|date',
+            'date' => 'required|date',
             'start_time' => 'required|date_format:H:i',
-            'end_date' => 'required|date|after_or_equal:start_date',
             'end_time' => 'required|date_format:H:i',
             'symbol' => 'required|string|in:×,tel,◎',
         ]);
 
         $admin = Auth::guard('admin')->user();
-        $start = Carbon::parse($request->start_date . ' ' . $request->start_time);
-        $end = Carbon::parse($request->end_date . ' ' . $request->end_time);
+        $start = Carbon::parse($request->date . ' ' . $request->start_time);
+        $end = Carbon::parse($request->date . ' ' . $request->end_time);
 
         $shop = $admin->shop;
         $lunchStartTime = $shop && $shop->break_start ? Carbon::parse($shop->break_start) : null;
@@ -82,8 +82,8 @@ class CalenderMarkController extends Controller
             return back()->withErrors(['time' => '30分刻みで指定してください。']);
         }
 
-        if ($end->lt($start)) {
-            return back()->withErrors(['time' => '終了日時は開始日時以降を指定してください。']);
+        if ($end->lte($start)) {
+            return back()->withErrors(['time' => '終了時間は開始時間より後を指定してください。']);
         }
 
         $confirmedReservations = Reservation::where('shop_id', $admin->shop_id)
@@ -102,11 +102,19 @@ class CalenderMarkController extends Controller
             }
         }
 
+        $existingManualMarks = CalenderMark::where('shop_id', $admin->shop_id)
+            ->where('is_manual', true)
+            ->where('date', $request->date)
+            ->get()
+            ->mapWithKeys(fn($m) => [$m->date . ' ' . substr($m->time, 0, 5) => true]);
+
         $rows = [];
         $skipped = 0;
         $skippedBreak = 0;
         $skippedClosed = 0;
-        for ($t = $start->copy(); $t->lte($end); $t->addMinutes(30)) {
+        $skippedManual = 0;
+        $skippedOutOfBusiness = 0;
+        for ($t = $start->copy(); $t->lt($end); $t->addMinutes(30)) {
             $slotKey = $t->format('Y-m-d H:i');
             if (in_array($t->dayOfWeek, $closedDayIndexes, true)) {
                 $skippedClosed++;
@@ -119,8 +127,23 @@ class CalenderMarkController extends Controller
                     continue;
                 }
             }
+            $slotTime = Carbon::parse($t->format('H:i'));
+            $businessStartCheck = $shop && $shop->business_start ? Carbon::parse($shop->business_start) : null;
+            $businessEndCheck = $shop && $shop->business_end ? Carbon::parse($shop->business_end) : null;
+            if ($businessStartCheck && $businessEndCheck) {
+                $defaultDuration = 60;
+                $slotEndTime = $slotTime->copy()->addMinutes($defaultDuration);
+                if ($slotTime->lt($businessStartCheck) || $slotEndTime->gt($businessEndCheck)) {
+                    $skippedOutOfBusiness++;
+                    continue;
+                }
+            }
             if (isset($reservedSlots[$slotKey])) {
                 $skipped++;
+                continue;
+            }
+            if (isset($existingManualMarks[$slotKey])) {
+                $skippedManual++;
                 continue;
             }
 
@@ -129,13 +152,14 @@ class CalenderMarkController extends Controller
                 'date' => $t->toDateString(),
                 'time' => $t->format('H:i:s'),
                 'symbol' => $request->symbol,
+                'is_manual' => false,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
         }
 
         if (count($rows) > 0) {
-            CalenderMark::upsert($rows, ['shop_id', 'date', 'time'], ['symbol', 'updated_at']);
+            CalenderMark::upsert($rows, ['shop_id', 'date', 'time'], ['symbol', 'is_manual', 'updated_at']);
         }
 
         return redirect()
@@ -146,7 +170,9 @@ class CalenderMarkController extends Controller
                 '一括設定しました（対象: ' . count($rows) .
                 ' / 予約済み除外: ' . $skipped .
                 ' / 休憩時間除外: ' . $skippedBreak .
-                ' / 定休日除外: ' . $skippedClosed . '）'
+                ' / 定休日除外: ' . $skippedClosed .
+                ' / 手動設定除外: ' . $skippedManual .
+                ' / 営業時間外除外: ' . $skippedOutOfBusiness . '）'
             );
     }
 }

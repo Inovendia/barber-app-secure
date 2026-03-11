@@ -13,5 +13,6 @@ class CalenderMark extends Model
         'date',
         'time',
         'symbol',
+        'is_manual',
     ];
 }

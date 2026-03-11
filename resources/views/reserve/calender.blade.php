@@ -23,6 +23,14 @@
             $reservedSlots[$slot] = true;
             }
             }
+
+            $businessStartTime = \Carbon\Carbon::parse($businessStart);
+            $businessEndTime = \Carbon\Carbon::parse($businessEnd);
+            $timeSlots = [];
+            for ($t = $businessStartTime->copy(); $t->lte($businessEndTime); $t->addMinutes(30)) {
+                $timeSlots[] = $t->format('G:i');
+            }
+
             $prevParams = array_merge(request()->all(), ['start_offset' => max($startOffset - 14, 0)]);
             $nextParams = array_merge(request()->all(), ['start_offset' => $startOffset + 14]);
             @endphp
@@ -81,12 +89,7 @@
                             </thead>
 
                             <tbody>
-                                @foreach ([
-                                    '8:00','8:30','9:00','9:30','10:00','10:30',
-                                    '11:00','11:30','12:00','12:30','13:00','13:30',
-                                    '14:00','14:30','15:00','15:30','16:00','16:30',
-                                    '17:00','17:30','18:00','18:30','19:00','19:30','20:00',
-                                ] as $time)
+                                @foreach ($timeSlots as $time)
                                     <tr>
                                         <!-- 左端時間列（sticky & 固定） -->
                                         <td class="bg-gray-50 px-2 py-1 whitespace-nowrap font-medium"
