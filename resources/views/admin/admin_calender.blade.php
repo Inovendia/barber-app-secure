@@ -36,6 +36,13 @@
             '14:00','14:30','15:00','15:30','16:00','16:30',
             '17:00','17:30','18:00','18:30','19:00','19:30','20:00',
         ];
+
+        $businessStartTime = \Carbon\Carbon::parse($businessStart);
+        $businessEndTime = \Carbon\Carbon::parse($businessEnd);
+        $timeSlots = [];
+        for ($t = $businessStartTime->copy(); $t->lte($businessEndTime); $t->addMinutes(30)) {
+            $timeSlots[] = $t->format('G:i');
+        }
     @endphp
 
     <div
@@ -77,66 +84,57 @@
                     <form method="POST" action="{{ route('admin.calender_marks.bulk') }}" class="flex flex-wrap items-end gap-2 pl-4">
                         @csrf
 
-                        <!-- 開始グループ -->
-                        <div class="flex flex-wrap items-end gap-2">
-                            <div>
-                                <label class="block text-xs text-gray-600">開始日</label>
-                                <input type="date" name="start_date" class="border rounded px-2 py-1"
-                                    value="{{ old('start_date', $dates[0]->format('Y-m-d')) }}" required>
-                            </div>
+                        <!-- 日付 -->
+                        <div>
+                            <label class="block text-xs text-gray-600">日付</label>
+                            <input type="date" name="date" class="border rounded px-2 py-1"
+                                value="{{ old('date', $dates[0]->format('Y-m-d')) }}" required>
+                        </div>
 
-                            <div class="min-w-[140px]">
-                                <label class="block text-xs text-gray-600">開始時間</label>
-                                <div style="position:relative; display:inline-block;">
-                                    <select name="start_time"
-                                        class="border rounded px-3 py-1 bg-white"
-                                        style="-webkit-appearance:none; appearance:none; padding-right:2.5rem; min-width:100px;"
-                                        required>
-                                        @foreach ($timeOptions as $timeOption)
-                                            <option value="{{ $timeOption }}"
-                                                @selected(old('start_time', \Carbon\Carbon::parse($businessStart)->format('H:i')) === $timeOption)>
-                                                {{ $timeOption }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <svg style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); pointer-events:none; width:1rem; height:1rem; color:#9ca3af;"
-                                        viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    </svg>
-                                </div>
+                        <!-- 開始時間 -->
+                        <div class="min-w-[140px]">
+                            <label class="block text-xs text-gray-600">開始時間</label>
+                            <div style="position:relative; display:inline-block;">
+                                <select name="start_time"
+                                    class="border rounded px-3 py-1 bg-white"
+                                    style="-webkit-appearance:none; appearance:none; padding-right:2.5rem; min-width:100px;"
+                                    required>
+                                    @foreach ($timeOptions as $timeOption)
+                                        <option value="{{ $timeOption }}"
+                                            @selected(old('start_time', \Carbon\Carbon::parse($businessStart)->format('H:i')) === $timeOption)>
+                                            {{ $timeOption }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <svg style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); pointer-events:none; width:1rem; height:1rem; color:#9ca3af;"
+                                    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                </svg>
                             </div>
                         </div>
 
-                        <!-- 伸びる余白 + 区切り -->
-                        <div class="flex items-center gap-2 px-4">
+                        <!-- 区切り -->
+                        <div class="flex items-center gap-2 px-2">
                             <span class="text-gray-500 font-semibold">〜</span>
                         </div>
 
-                        <!-- 終了グループ -->
-                        <div class="flex flex-wrap items-end gap-2">
-                            <div>
-                                <label class="block text-xs text-gray-600">終了日</label>
-                                <input type="date" name="end_date" class="border rounded px-2 py-1"
-                                    value="{{ old('end_date', $dates[0]->copy()->addDay()->format('Y-m-d')) }}" required>
-                            </div>
-
-                            <div class="min-w-[140px]">
-                                <label class="block text-xs text-gray-600">終了時間</label>
-                                <div style="position:relative; display:inline-block;">
-                                    <select name="end_time"
-                                        class="border rounded px-3 py-1 bg-white"
-                                        style="-webkit-appearance:none; appearance:none; padding-right:2.5rem; min-width:100px;"
-                                        required>
-                                        @foreach ($timeOptions as $timeOption)
-                                            <option value="{{ $timeOption }}"
-                                                @selected(old('end_time', \Carbon\Carbon::parse($businessEnd)->format('H:i')) === $timeOption)>
-                                                {{ $timeOption }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <svg style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); pointer-events:none; width:1rem; height:1rem; color:#9ca3af;"
-                                        viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    </svg>
-                                </div>
+                        <!-- 終了時間 -->
+                        <div class="min-w-[140px]">
+                            <label class="block text-xs text-gray-600">終了時間</label>
+                            <div style="position:relative; display:inline-block;">
+                                <select name="end_time"
+                                    class="border rounded px-3 py-1 bg-white"
+                                    style="-webkit-appearance:none; appearance:none; padding-right:2.5rem; min-width:100px;"
+                                    required>
+                                    @foreach ($timeOptions as $timeOption)
+                                        <option value="{{ $timeOption }}"
+                                            @selected(old('end_time', \Carbon\Carbon::parse($businessEnd)->format('H:i')) === $timeOption)>
+                                            {{ $timeOption }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <svg style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); pointer-events:none; width:1rem; height:1rem; color:#9ca3af;"
+                                    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                </svg>
                             </div>
                         </div>
 
@@ -185,12 +183,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ([
-                                    '8:00','8:30','9:00','9:30','10:00','10:30',
-                                    '11:00','11:30','12:00','12:30','13:00','13:30',
-                                    '14:00','14:30','15:00','15:30','16:00','16:30',
-                                    '17:00','17:30','18:00','18:30','19:00','19:30','20:00',
-                                ] as $time)
+                                @foreach ($timeSlots as $time)
                                     <tr>
                                         <td class="border px-2 py-1 bg-gray-50 font-medium whitespace-nowrap">{{ $time }}</td>
                                         @foreach ($dates as $i => $date)
@@ -337,6 +330,7 @@
         <!-- 記号選択ドロップダウン -->
         <div
             x-show="symbolMode && selectedSlot"
+            x-cloak
             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
             @click.self="selectedSlot = null"
         >
