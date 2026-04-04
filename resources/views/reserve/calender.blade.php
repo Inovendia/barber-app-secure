@@ -119,7 +119,7 @@
                                                 $slotDateTime = $date->copy()->setTimeFromTimeString($time)->format('Y-m-d H:i');
                                                 $mark = $calenderMarks[$slotDateTime][0]->symbol ?? null;
 
-                                                // 新規予約の施術時間内に既存予約があれば ×
+                                                // 新規予約の施術時間内に既存予約またはcalender_marksの×があれば ×
                                                 $isReserved = false;
                                                 $intervals = ceil($duration / 30);
                                                 for ($j = 0; $j < $intervals; $j++) {
@@ -127,6 +127,14 @@
                                                     if (isset($reservedSlots[$checkSlot])) {
                                                         $isReserved = true;
                                                         break;
+                                                    }
+                                                    $checkMark = $calenderMarks[$checkSlot][0]->symbol ?? null;
+                                                    if ($checkMark) {
+                                                        $normalizedCheckMark = trim(mb_convert_kana($checkMark, 'as'));
+                                                        if ($normalizedCheckMark === '×') {
+                                                            $isReserved = true;
+                                                            break;
+                                                        }
                                                     }
                                                 }
 
@@ -138,9 +146,11 @@
                                                     'ハイトーン (青・金など要ブリーチ ※要相談) 10000円~',
                                                 ], true);
 
-                                                if ($normalizedMark) {
+                                                if ($isReserved) {
+                                                    $displaySymbol = '×';
+                                                } elseif ($normalizedMark) {
                                                     $displaySymbol = $normalizedMark === '◯' ? '◎' : $normalizedMark;
-                                                } elseif ($isPast || $isClosed || $isOutOfBusiness || $isReserved) {
+                                                } elseif ($isPast || $isClosed || $isOutOfBusiness) {
                                                     $displaySymbol = '×';
                                                 } elseif ($isWithin1Hour) {
                                                     $displaySymbol = '📞';

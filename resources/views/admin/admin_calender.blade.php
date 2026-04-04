@@ -207,7 +207,24 @@
                                                 $slotDateTime = $date->copy()->setTimeFromTimeString($start->format('H:i'))->format('Y-m-d H:i');
                                                 $mark = $calenderMarks[$slotDateTime][0]->symbol ?? null;
 
-                                                $isReserved = isset($reservedSlots[$slotDateTime]);
+                                                // 施術時間全体で既存予約またはcalender_marksの×をチェック
+                                                $isReserved = false;
+                                                $intervals = ceil($duration / 30);
+                                                for ($j = 0; $j < $intervals; $j++) {
+                                                    $checkSlot = $date->copy()->setTimeFromTimeString($start->format('H:i'))->addMinutes(30 * $j)->format('Y-m-d H:i');
+                                                    if (isset($reservedSlots[$checkSlot])) {
+                                                        $isReserved = true;
+                                                        break;
+                                                    }
+                                                    $checkMark = $calenderMarks[$checkSlot][0]->symbol ?? null;
+                                                    if ($checkMark) {
+                                                        $normalizedCheckMark = trim(mb_convert_kana($checkMark, 'as'));
+                                                        if ($normalizedCheckMark === '×') {
+                                                            $isReserved = true;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
                                                 $isOutOfBusiness = $beforeOpening || $afterClosing || $isLunchTime;
 
                                                 $normalizedMark = null;
