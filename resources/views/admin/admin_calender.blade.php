@@ -208,20 +208,27 @@
                                                 $mark = $calenderMarks[$slotDateTime][0]->symbol ?? null;
 
                                                 // 施術時間全体で既存予約またはcalender_marksの×をチェック
+                                                // symbol_mode=1（記号設定モード）では先読みせず、そのスロット自体のみ判定
                                                 $isReserved = false;
-                                                $intervals = ceil($duration / 30);
-                                                for ($j = 0; $j < $intervals; $j++) {
-                                                    $checkSlot = $date->copy()->setTimeFromTimeString($start->format('H:i'))->addMinutes(30 * $j)->format('Y-m-d H:i');
-                                                    if (isset($reservedSlots[$checkSlot])) {
+                                                if (request()->query('symbol_mode') == 1) {
+                                                    if (isset($reservedSlots[$slotDateTime])) {
                                                         $isReserved = true;
-                                                        break;
                                                     }
-                                                    $checkMark = $calenderMarks[$checkSlot][0]->symbol ?? null;
-                                                    if ($checkMark) {
-                                                        $normalizedCheckMark = trim(mb_convert_kana($checkMark, 'as'));
-                                                        if ($normalizedCheckMark === '×') {
+                                                } else {
+                                                    $intervals = ceil($duration / 30);
+                                                    for ($j = 0; $j < $intervals; $j++) {
+                                                        $checkSlot = $date->copy()->setTimeFromTimeString($start->format('H:i'))->addMinutes(30 * $j)->format('Y-m-d H:i');
+                                                        if (isset($reservedSlots[$checkSlot])) {
                                                             $isReserved = true;
                                                             break;
+                                                        }
+                                                        $checkMark = $calenderMarks[$checkSlot][0]->symbol ?? null;
+                                                        if ($checkMark) {
+                                                            $normalizedCheckMark = trim(mb_convert_kana($checkMark, 'as'));
+                                                            if ($normalizedCheckMark === '×') {
+                                                                $isReserved = true;
+                                                                break;
+                                                            }
                                                         }
                                                     }
                                                 }
